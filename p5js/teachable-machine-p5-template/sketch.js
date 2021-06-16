@@ -1,20 +1,27 @@
-//client er den variabel der bruges til at oprette forbindelse til mqtt serveren
-let client 
-let connectionDiv
+// the link to your model provided by Teachable Machine export panel
+const URL = "https://teachablemachine.withgoogle.com/models/nU6R891k6/";
+let video, label, classifier
+
+function preload() {
+  // Initialize the Image Classifier method with MobileNet
+  classifier = ml5.imageClassifier(URL + 'model.json');
+}
+
 
 //setup er den funktion der kører, før selve web-appen går starter 
 function setup() {
-  connectionDiv = select('#connection')
-  //det første vi gør her, er at oprette forbindelse til mqtt serveren - selve funktionen kan ses længere nede
-  mqttInit()
-  client.subscribe('kmg001')
-  //når vi modtager beskeder fra MQTT serveren kaldes denne funktion
-  client.on('message', (topic, message) => {
-    console.log('Received Message: ' + message.toString() + '\nOn topic: ' + topic)
-    if(topic.includes('humidity')) select('#hum').html('Humidity i K3: ' + message)
-    if(topic.includes('temperature')) select('#temp').html('Temperatur i K3: ' + message)
-    if(topic.includes('light')) select('#light').html('Lys i K3: ' + message)
-  })  
+  noCanvas()
+  video = createCapture(VIDEO)
+  select('#video').child(video)
+  classifyVideo()
+}
+
+function classifyVideo(){
+  classifier.classify(video, (err, results) => {
+    // console.log(results)
+    select('#label').html(results[0].label)
+    classifyVideo()
+  })
 }
 
 
@@ -92,7 +99,6 @@ const mqttInit = () => {
   //hvis forbindelsen lykkes kaldes denne funktion
   client.on('connect', () => {
     console.log('Client connected:' + clientId)
-    connectionDiv.html('<p>You are now connected to mqtt.nextservices.dk</p>')
   })
 
   //når forbindelsen lukkes kaldes denne funktion
