@@ -7,11 +7,11 @@ function setup() {
   connectionDiv = select('#connection')
   //det første vi gør her, er at oprette forbindelse til mqtt serveren - selve funktionen kan ses længere nede
   mqttInit()
-  client.subscribe('kmg001')
+  client.subscribe('kmg001/+')
   //når vi modtager beskeder fra MQTT serveren kaldes denne funktion
   client.on('message', (topic, message) => {
     console.log('Received Message: ' + message.toString() + '\nOn topic: ' + topic)
-    if(topic.includes('humidity')) select('#hum').html('Humidity i K3: ' + message)
+    if(topic.includes('humidity')) select('#hum').html(message)
     if(topic.includes('temperature')) select('#temp').html('Temperatur i K3: ' + message)
     if(topic.includes('light')) select('#light').html('Lys i K3: ' + message)
   })  
