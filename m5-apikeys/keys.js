@@ -38,6 +38,46 @@ export const keys = [
             name:'atom-1001',
             where:'k2',
             key:'DBA46070'
+        },
+        {
+            name:'1',
+            where:'k2',
+            key:'6EA27505'
+        },
+        {
+            name:'2',
+            where:'k2',
+            key:'7DD009A3'
+        },
+        {
+            name:'3',
+            where:'k2',
+            key:'49A3D7C2'
+        },
+        {
+            name:'4',
+            where:'k2',
+            key:'E36D334E'
+        },
+        {
+            name:'5',
+            where:'k2',
+            key:'F7976C0E'
+        },
+        {
+            name:'6',
+            where:'k2',
+            key:'45D9F7BB'
+        },
+        {
+            name:'7',
+            where:'k2',
+            key:'7A697930'
+        },
+        {
+            name:'8',
+            where:'k2',
+            key:'2BCCE9EB'
         }
     ]
 ] 
