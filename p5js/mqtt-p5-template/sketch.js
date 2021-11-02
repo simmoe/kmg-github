@@ -12,9 +12,7 @@ function setup() {
   //når vi modtager beskeder fra MQTT serveren kaldes denne funktion
   client.on('message', (topic, message) => {
     console.log('Received Message: ' + message.toString() + '\nOn topic: ' + topic)
-    if(topic.includes('humidity')) select('#hum').html(message)
-    if(topic.includes('temperature')) select('#temp').html('Temperatur i K3: ' + message)
-    if(topic.includes('light')) select('#light').html('Lys i K3: ' + message)
+    select('#hum').html('X på eriks m5: ' + message )
   })  
 }
 
