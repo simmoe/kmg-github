@@ -3,7 +3,7 @@ export const keys = [
     [
         {
             name:'stick-1001',
-            where:'k2-wall-mount',
+            where:'k2-peekhole',
             key:'E6B16405'
         },
         {
@@ -36,7 +36,7 @@ export const keys = [
     [
         {
             name:'atom-1001',
-            where:'k2',
+            where:'k2-illusion-button',
             key:'DBA46070'
         },
         {
