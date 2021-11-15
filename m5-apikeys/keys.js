@@ -78,11 +78,6 @@ export const keys = [
             name:'8',
             where:'k2',
             key:'2BCCE9EB'
-        },
+        }
     ]
-        'hue-users'= [
-            {
-                
-            }
-        ]
 ] 
