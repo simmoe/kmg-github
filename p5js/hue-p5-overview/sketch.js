@@ -1,6 +1,7 @@
 //currentpage skal pege på det side-id der skal være aktivt først (fra html filen) 
 let currentPage = '#side-1'
 //https://developers.meethue.com/develop/get-started-2/core-concepts/
+//10.78.65.185/api/kgMgko5iDYljmA3ERym5GDibEkDzQTxutUSDqN36/groups
 
 var ip = '10.78.65.185' // the hub IP address
 var username = 'kgMgko5iDYljmA3ERym5GDibEkDzQTxutUSDqN36'       // fill in your Hub-given username here
@@ -16,6 +17,10 @@ function setup() {
   usernameField = select('#username').value(username)
   connectButton = select('#connect')
   connectButton.mouseClicked(connect);
+
+  url = "http://" + addressField.value() + '/api/' + usernameField.value() + '/groups/K2/action'
+  let action = JSON.stringify({ 'on': false })	
+  httpDo(url, 'PUT', action, setLightsCallback)
 }
 
 /*

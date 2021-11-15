@@ -78,6 +78,12 @@ export const keys = [
             name:'8',
             where:'k2',
             key:'2BCCE9EB'
-        }
-    ]
+        },
+    ],
+        'hue-users'= [
+            {
+                'name':'K2',
+                'username': 'kgMgko5iDYljmA3ERym5GDibEkDzQTxutUSDqN36'
+            }
+        ]
 ] 
