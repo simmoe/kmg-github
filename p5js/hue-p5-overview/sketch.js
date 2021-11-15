@@ -20,7 +20,7 @@ function setup() {
 
   url = "http://" + addressField.value() + '/api/' + usernameField.value() + '/groups/K2/action'
   let action = JSON.stringify({ 'on': false })	
-  httpDo(url, 'PUT', action, setLightsCallback)
+  httpDo(url, 'PUT', action, m=>select('main').html(m))
 }
 
 /*
