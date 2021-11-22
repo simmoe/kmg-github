@@ -17,10 +17,6 @@ function setup() {
   usernameField = select('#username').value(username)
   connectButton = select('#connect')
   connectButton.mouseClicked(connect);
-
-  url = "http://" + addressField.value() + '/api/' + usernameField.value() + '/groups/K2/action'
-  let action = JSON.stringify({ 'on': false })	
-  httpDo(url, 'PUT', action, m=>select('main').html(m))
 }
 
 /*

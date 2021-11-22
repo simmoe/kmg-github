@@ -89,8 +89,8 @@ const mqttInit = () => {
   })
 
   //hvis forbindelsen lykkes kaldes denne funktion
-  client.on('connect', () => {
-    console.log('Client connected:' + clientId)
+  client.on('connect', (t, m) => {
+    console.log('Client connected:' + clientId, t)
     connectionDiv.html('<p>You are now connected to mqtt.nextservices.dk</p>')
   })
 
