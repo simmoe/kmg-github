@@ -4,19 +4,19 @@ let tags = document.querySelector('#tags')
 const toggleIframe = (url, howlong) => {
   iframe.src = url
   iframe.style.left = 0
-  setTimeout(()=>iframe.style.left='-100vw', howlong)
+  setTimeout(()=>{iframe.style.left='-100vw';iframe.src=''}, howlong)
 }
 
 const toggleYoutube = (embed, howlong) => {
   tags.innerHTML = embed
   tags.style.left = 0
-  setTimeout(()=>tags.style.left='-100vw', howlong)
+  setTimeout(()=>{tags.style.left='-100vw';tags.innerHTML=''}, howlong)
 }
 
 const toggleHtml = (html, howlong) => {
   tags.innerHTML = html
   tags.style.left = 0
-  setTimeout(()=>tags.style.left='-100vw', howlong)
+  setTimeout(()=>{tags.style.left='-100vw';tags.innerHTML=''}, howlong)
 }
 
 
@@ -121,16 +121,10 @@ client.subscribe('raspberry/+')
       location.reload()
     } 
             
-    console.log('Received Message: ' + obj + '\nOn topic: ' + topic)
+    console.log('Received Message: ' + message + '\nOn topic: ' + topic)
   })  
 
-  let obj = {
-    'content': 'youtube', 
-    'embed': '<iframe width="560" height="315" src="https://www.youtube.com/embed/wUSguNU5YkY?autoplay=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>',
-    'howlong': 10000
-  }
-  obj = JSON.stringify(obj)
-  client.publish('raspberry/hi', obj)
+
 
 
 
