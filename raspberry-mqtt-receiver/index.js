@@ -7,6 +7,12 @@ const toggleIframe = (url, howlong) => {
   setTimeout(()=>iframe.style.left='-100vw', howlong)
 }
 
+const toggleYoutube = (embed, howlong) => {
+  tags.innerHTML = embed
+  tags.style.left = 0
+  setTimeout(()=>tags.style.left='-100vw', howlong)
+}
+
 const toggleHtml = (html, howlong) => {
   tags.innerHTML = html
   tags.style.left = 0
@@ -97,13 +103,16 @@ client.subscribe('raspberry/+')
         obj = {
           'content':'html',
           'html':'<h2>' + e + '</h2>',
-          'howlong':5000,
+          'howlong': 5000
         }
     }
     console.log(obj)
 
     if(obj.content == 'webpage'){
       toggleIframe(obj.url, obj.howlong)
+    } 
+    if(obj.content == 'youtube'){
+      toggleYoutube(obj.embed, obj.howlong)
     } 
     if(obj.content == 'html'){
       toggleHtml(obj.html, obj.howlong)
@@ -115,26 +124,13 @@ client.subscribe('raspberry/+')
     console.log('Received Message: ' + obj + '\nOn topic: ' + topic)
   })  
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  let obj = {
+    'content': 'youtube', 
+    'embed': '<iframe id="ytplayer" type="text/html" width="640" height="360"src="https://www.youtube.com/embed/M7lc1UVf-VE?autoplay=1&origin=http://example.com"frameborder="0"></iframe>',
+    'howlong': 10000
+  }
+  obj = JSON.stringify(obj)
+//  client.publish('raspberry/hi', obj)
 
 
 
