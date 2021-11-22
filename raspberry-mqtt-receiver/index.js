@@ -86,12 +86,22 @@ const mqttInit = () => {
 
 mqttInit()
 
-
-client.subscribe('rasperry/+')
+client.subscribe('raspberry/+')
   //når vi modtager beskeder fra MQTT serveren kaldes denne funktion
   client.on('message', (topic, message) => {
-    const obj = JSON.parse(message)
+    let obj
+    try {
+      obj = JSON.parse(message)
+    } catch(e) {
+        console.log('error: ', e) // error in the above string (in this case, yes)!
+        obj = {
+          'content':'html',
+          'html':'<h2>' + e + '</h2>',
+          'howlong':5000,
+        }
+    }
     console.log(obj)
+
     if(obj.content == 'webpage'){
       toggleIframe(obj.url, obj.howlong)
     } 
