@@ -6,7 +6,7 @@ let currentPage = '#side-1'
 var ip = '10.78.65.185' // the hub IP address
 var username = 'kgMgko5iDYljmA3ERym5GDibEkDzQTxutUSDqN36'       // fill in your Hub-given username here
 var usernameField, addressField, connectButton
-let url
+let url, groupUrl
 
 var controlArray = [] // array of light control divs
 
@@ -28,33 +28,110 @@ function connect() {
   controlArray = []        // clear the control array
   url = "http://" + addressField.value() + '/api/' + usernameField.value() + '/lights/'
   httpDo(url, 'GET', getLights)
+  groupUrl = "http://" + addressField.value() + '/api/' + usernameField.value() + '/groups/'
+  httpDo(groupUrl, 'GET', getGroups)
 }
 /*
 this function uses the response from the hub
 to create a new div for the UI elements
 */
 
-
-
 function getLights(result) {
-  console.log(result)
+  //console.log(result)
   select('main').html('')
   var lights = JSON.parse(result)		          // parse the HTTP response
   for (thisLight in lights) {			            // iterate over each light in the response
     var controlDiv = createElement('div').addClass('light')		// create a div
     controlDiv.id(thisLight)				          // name it
     controlArray.push(controlDiv);            // add it to array of light controls
-    // create an input field:
-    var nameField = createElement('h2',lights[thisLight].name, 'text')
-    nameField.id(lights[thisLight].name)      // give the input a value
-    controlDiv.child(nameField)	  	          // add the field to the light's div
-    nameField.mouseReleased(changeName)       // add a mouseReleased behavior
-
+    controlDiv.child(createElement('h2', lights[thisLight].name))	// add title to the light's div
     // create the controls inside it:
-    
     createControl(lights[thisLight], controlDiv)
     select('main').child(controlDiv)
   }
+}
+function getGroups(result) {
+  let K2 = JSON.parse(result)
+  //were only interested in the first group, K2 
+  K2 = Object.values(K2)[0]
+  console.log(K2)
+  let groupDiv = createElement('div').addClass('light')
+  groupDiv.html('<h2>Gruppe: ' + K2.name + '</h2>')
+  let body = {
+    "hue": K2.action.hue,
+    "bri": K2.action.bri,
+    "sat": 254,
+    "on": K2.action.on,
+  }
+  let brightness = createSlider(0,254, K2.action.bri).mouseReleased(()=>{
+    body.bri = brightness.value()
+    setGroup(K2.name, 'action', body)
+  })
+  let red = createButton('red').mouseReleased(()=>{
+    body.hue = 65535
+    setGroup(K2.name, 'action', body)
+  })
+  let green = createButton('green').mouseReleased(()=>{
+    body.hue = 25500
+    setGroup(K2.name, 'action', body)
+  })
+  let blue = createButton('blue').mouseReleased(()=>{
+    body.hue = 46920
+    setGroup(K2.name, 'action', body)
+  })
+  let hueInput = createInput(K2.action.hue).mouseReleased(()=>{
+    body.hue = hueInput.value()
+    setGroup(K2.name, 'action', body)
+  })
+  let satInput = createInput(K2.action.sat).mouseReleased(()=>{
+    body.sat = satInput.value()
+  })
+  hueSatBtn = createButton('set').mouseReleased(()=>setGroup(K2.name, 'action', body))
+
+
+  let currentColor = ColorConverter.xyBriToRgb(K2.action.xy[0], K2.action.xy[1], K2.action.bri)
+  currentColor = ColorConverter.rgbToHex(currentColor.r, currentColor.g, currentColor.b)
+  console.log(currentColor)
+  let picker = createColorPicker(currentColor)
+  let pickerBtn = createButton('go')
+  pickerBtn.mouseReleased(()=>{
+    let rgbColor = ColorConverter.hexToRgb(picker.value())
+    let xyColor = ColorConverter.rgbToXy(rgbColor.levels[0], rgbColor.levels[1], rgbColor.levels[2])
+    console.log(xyColor)
+    body = {
+      xy: [xyColor.x, xyColor.y]
+    }
+    setGroup(K2.name, 'action', body)
+  })
+
+  let hueSatDiv = createElement('div', '<label>hue and saturation</label>')
+  hueSatDiv.child(hueInput)
+  hueSatDiv.child(satInput)
+  hueSatDiv.child(hueSatBtn)
+
+  let pickerDiv = createElement('div', '<label>pick a color</label>')
+  pickerDiv.child(picker)
+  pickerDiv.child(pickerBtn)
+  let brightnessDiv = createElement('div', '<label>brightness</label>')
+  brightnessDiv.child(brightness)
+  let colorDiv = createElement('div', '<label>color</label>')
+  colorDiv.child(red)
+  colorDiv.child(green)
+  colorDiv.child(blue)
+  groupDiv.child(brightnessDiv)
+  groupDiv.child(colorDiv)
+  groupDiv.child(hueSatDiv)
+  groupDiv.child(pickerDiv)
+  select('main').child(groupDiv)
+}
+
+async function setGroup(groupName, command, body){
+  var path = groupUrl + groupName + '/' + command 		  // assemble the full URL
+  console.log('setting ' + path)
+  var content = JSON.stringify(body)				        // convert JSON obj to string
+  await httpDo(path, 'PUT', content, 'text', setLightsCallback)  //HTTP PUT the change
+  await httpDo(url, 'GET', getLights)
+  httpDo(groupUrl, 'GET', getGroups)
 }
 
 /*
@@ -87,11 +164,30 @@ function createControl(thisLight, thisDiv) {
         myInput = createSlider(0, 254,state.sat);		// a slider for saturation
         myInput.mouseReleased(changeProperty); // set the mouseClicked callback
         break;
-      case 'ct':
-        myInput = createSlider(153, 500,state.ct);	// a slider for color temp
-        myInput.mouseReleased(changeProperty); // set the mouseClicked callback
+      // case 'ct':
+      //   myInput = createSlider(153, 500,state.ct);	// a slider for color temp
+      //   myInput.mouseReleased(changeProperty); // set the mouseClicked callback
+      //   break;
+/*       case 'xy':
+        myInput = createElement('div')
+        let rgb = ColorConverter.xyBriToRgb(state.xy[0], state.xy[1],state.bri)
+        let hex = ColorConverter.rgbToHex(rgb.r, rgb.g, rgb.b)
+        let myColor = createColorPicker(hex)
+        let myBtn = createButton('set')
+        myBtn.mouseReleased(() => {
+          let rgb = ColorConverter.hexToRgb(myColor.value())
+          let CIE = ColorConverter.rgbToXy(rgb.levels[0],rgb.levels[1], rgb.levels[2] )
+          let body = {
+            "hue": 50000,
+            "on": true,
+            "xy": [CIE.x, CIE.y]
+          }
+          setLight(thisDiv.elt.id, body, 'state')
+        })
+        myInput.child(myColor)
+        myInput.child(myBtn)
         break;
-      case 'colormode':
+ */      case 'colormode':
         myInput = createSpan(state.colormode);	// a label for colormode
         break;
       case 'reachable':
