@@ -37,7 +37,7 @@ to create a new div for the UI elements
 */
 
 function getLights(result) {
-  //console.log(result)
+  console.log(JSON.parse(result))
   select('main').html('')
   var lights = JSON.parse(result)		          // parse the HTTP response
   for (thisLight in lights) {			            // iterate over each light in the response
@@ -54,7 +54,7 @@ function getGroups(result) {
   let K2 = JSON.parse(result)
   //were only interested in the first group, K2 
   K2 = Object.values(K2)[0]
-  console.log(K2)
+  //console.log(K2)
   let groupDiv = createElement('div').addClass('light')
   groupDiv.html('<h2>Gruppe: ' + K2.name + '</h2>')
   let body = {
