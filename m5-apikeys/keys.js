@@ -3,7 +3,7 @@ export const keys = [
     [
         {
             name:'stick-1001',
-            where:'k2-wall-mount',
+            where:'k2-peekhole',
             key:'E6B16405'
         },
         {
@@ -36,7 +36,7 @@ export const keys = [
     [
         {
             name:'atom-1001',
-            where:'k2',
+            where:'k2-illusion-button',
             key:'DBA46070'
         },
         {
@@ -78,6 +78,107 @@ export const keys = [
             name:'8',
             where:'k2',
             key:'2BCCE9EB'
-        }
-    ]
+        },
+        {
+            name:'9',
+            where:'k2',
+            key:'53B28FE9'
+        },
+        {
+            name:'10',
+            where:'k2',
+            key:'F818AC4C'
+        },
+        {
+            name:'11',
+            where:'k2',
+            key:'609EF6A3'
+        },
+        {
+            name:'12',
+            where:'k2',
+            key:'B72591E7'
+        },
+        {
+            name:'13',
+            where:'k2',
+            key:'4DB0FDEC'
+        },
+        {
+            name:'14',
+            where:'k2',
+            key:'CF9778A3'
+        },
+        {
+            name:'15',
+            where:'k2',
+            key:'9771DDEB'
+        },
+        {
+            name:'16',
+            where:'k2',
+            key:'362C35A5'
+        },
+        {
+            name:'17',
+            where:'k2',
+            key:'1F727AC1'
+        },
+        {
+            name:'18',
+            where:'k2',
+            key:'5F500E2F'
+        },
+        {
+            name:'19',
+            where:'k2',
+            key:'95F36A24'
+        },
+        {
+            name:'20',
+            where:'k2',
+            key:'4E7F1DD6'
+        },
+         {
+            name:'21',
+            where:'k2',
+            key:'B2A0051E'
+        },
+         {
+            name:'22',
+            where:'k2',
+            key:'0D2BD2C6'
+        },
+         {
+            name:'23',
+            where:'k2',
+            key:'A1DDE878'
+        },
+         {
+            name:'24',
+            where:'k2',
+            key:'50C5FE8D'
+        },
+        {
+            name:'25',
+            where:'k2',
+            key:'B9C26A64'
+        },
+        {
+            name:'26',
+            where:'k2',
+            key:'E36D334E'
+        },
+        {
+            name:'27',
+            where:'k2',
+            key:'F36A39C6'
+        },
+    ],
+        'hue-users'= [
+            {
+                'name':'K2',
+                'username': 'kgMgko5iDYljmA3ERym5GDibEkDzQTxutUSDqN36'
+            }
+        ]
 ] 
