@@ -55,7 +55,7 @@ export const keys = [
             key:'49A3D7C2'
         },
         {
-            name:'4',
+            name:'4 - record buttons',
             where:'k2',
             key:'E36D334E'
         },
