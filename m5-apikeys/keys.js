@@ -40,6 +40,11 @@ export const keys = [
             key:'DBA46070'
         },
         {
+            name:'emmy',
+            where:'nora-lys',
+            key:'ADC09BFC'
+        },
+        {
             name:'1',
             where:'k2',
             key:'6EA27505'
