@@ -40,6 +40,11 @@ export const keys = [
             key:'DBA46070'
         },
         {
+            name:'emmy',
+            where:'nora-lys',
+            key:'ADC09BFC'
+        },
+        {
             name:'1',
             where:'k2',
             key:'6EA27505'
@@ -55,7 +60,7 @@ export const keys = [
             key:'49A3D7C2'
         },
         {
-            name:'4',
+            name:'4 - record buttons',
             where:'k2',
             key:'E36D334E'
         },
