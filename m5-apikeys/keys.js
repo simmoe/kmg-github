@@ -145,8 +145,8 @@ export const keys = [
             key:'B2A0051E'
         },
          {
-            name:'22',
-            where:'k2',
+            name:'Alborada',
+            where:'k2-Basement room',
             key:'0D2BD2C6'
         },
          {

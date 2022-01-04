@@ -1,5 +1,5 @@
 function setup() {
- 
+    getData('Klima', 'Mandag')    
 }
 
 
@@ -13,7 +13,6 @@ function getData(collection, doc){
     db.collection(collection).doc(doc)
     .onSnapshot( doc => {
         console.log(doc.data())
-        showChart(doc.data())
     })
 }
 
