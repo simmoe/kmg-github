@@ -30,6 +30,11 @@ export const keys = [
             name:'stick-1006',
             where:'k2-tyverialarm',
             key:'F3539DBD'
+        },
+        {
+            name:'stick-1007',
+            where:'K2-Poster-Pir',
+            key:'43B7D367'
         }
     ],
     'atom'=

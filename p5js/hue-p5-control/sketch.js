@@ -2,7 +2,7 @@
 
 var ip = '10.78.65.185' // the hub IP address
 var username = 'kgMgko5iDYljmA3ERym5GDibEkDzQTxutUSDqN36';       // fill in your Hub-given username here
-var myLight = 1
+var myLight = 2
 var usernameField, addressField, connectButton;
 
 var controlArray = [] // array of light control divs
@@ -20,6 +20,7 @@ function setup() {
 this function makes the HTTP GET call
 to get the light data
 */
+
 function connect() {
   this.html("refresh")      // change the connect button to 'refresh'
   select('main').html('')   //empty the webpage
@@ -44,11 +45,6 @@ function getLight(light) {
   // create the controls inside it:
   createControl(light, controlDiv)
   select('main').child(controlDiv)
-
-  return 
-
-
-  
 }
 
 /*
@@ -71,19 +67,19 @@ function createControl(thisLight, thisDiv) {
         break;
       case 'bri':
         myInput = createSlider(0, 254, state.bri);	// a slider for brightness
-        myInput.mouseReleased(changeProperty); // set the mouseClicked callback
+        myInput.changed(changeProperty); // set the mouseClicked callback
         break;
       case 'hue':
         myInput = createSlider(0, 65535,state.hue);	// a slider for hue
-        myInput.mouseReleased(changeProperty); // set the mouseClicked callback
+        myInput.changed(changeProperty); // set the mouseClicked callback
         break;
       case 'sat':
         myInput = createSlider(0, 254,state.sat);		// a slider for saturation
-        myInput.mouseReleased(changeProperty); // set the mouseClicked callback
+        myInput.changed(changeProperty); // set the mouseClicked callback
         break;
       case 'ct':
         myInput = createSlider(153, 500,state.ct);	// a slider for color temp
-        myInput.mouseReleased(changeProperty); // set the mouseClicked callback
+        myInput.changed(changeProperty); // set the mouseClicked callback
         break;
       case 'colormode':
         myInput = createSpan(state.colormode);	// a label for colormode
@@ -114,6 +110,7 @@ the properties of the lights
 */
 
 function changeProperty(e) {
+  console.log('change property')
   var thisControl = e.target.id;				  // what did you click on?
   var thisLight = e.target.parentNode.id;	// get the parent (light number)
   var value = e.target.value;					    // get the value
@@ -137,9 +134,9 @@ this function makes an HTTP PUT call to change
 the properties of the lights
 */
 function setLight(lightNumber, data, command) {
-  console.log(lightNumber, data, command)
-  return
-  var path = url + lightNumber + '/' + command;		  // assemble the full URL
+  console.log('setting')
+  var path = url + 'state'		  // assemble the full URL
+  console.log(url)
   var content = JSON.stringify(data);				        // convert JSON obj to string
   httpDo( path, 'PUT', content, 'text', getLight); //HTTP PUT the change
 }
@@ -243,3 +240,7 @@ const mqttInit = () => {
     })
   } 
   
+
+
+
+
