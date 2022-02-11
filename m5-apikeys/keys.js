@@ -35,7 +35,12 @@ export const keys = [
             name:'stick-1007',
             where:'K2-Poster-Pir',
             key:'43B7D367'
-        }
+        },
+        {
+            name:'stick-1008',
+            where:'K2-Hue-Footbutton',
+            key:'49E57DD8'
+        },
     ],
     'atom'=
     [
