@@ -96,7 +96,7 @@ export const keys = [
         },
         {
             name:'9',
-            where:'k2',
+            where:'k2-boards-of-canada',
             key:'53B28FE9'
         },
         {
