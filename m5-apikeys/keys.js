@@ -41,6 +41,17 @@ export const keys = [
             where:'K2-Hue-Footbutton',
             key:'49E57DD8'
         },
+        45d9f7bb
+        {
+            name:'stick-1009',
+            where:'K2-Office-Actuator',
+            key:'9CBA7418'
+        },
+        {
+            name:'stick-1010',
+            where:'K2-Rainbow-Stick',
+            key:'C91CC05D'
+        },
     ],
     'atom'=
     [
@@ -80,7 +91,7 @@ export const keys = [
             key:'F7976C0E'
         },
         {
-            name:'6',
+            name:'K2-on-air-sign',
             where:'k2',
             key:'45D9F7BB'
         },

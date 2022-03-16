@@ -6,7 +6,7 @@ let currentPage = '#side-1'
 var ip = '10.78.65.185' // the hub IP address
 var username = 'kgMgko5iDYljmA3ERym5GDibEkDzQTxutUSDqN36'       // fill in your Hub-given username here
 var usernameField, addressField, connectButton
-let url, groupUrl
+let url, groupUrl, scenesUrl, allScenes
 
 var controlArray = [] // array of light control divs
 
@@ -23,13 +23,17 @@ function setup() {
 this function makes the HTTP GET call
 to get the light data
 */
-function connect() {  
-  this.html("refresh")     // change the connect button to 'refresh'
+async function connect() {  
   controlArray = []        // clear the control array
+  scenesUrl = "http://" + addressField.value() + '/api/' + usernameField.value() + '/scenes/'
+  await httpDo(scenesUrl, 'GET', getScenes)
+  this.html("refresh")     // change the connect button to 'refresh'
+
   url = "http://" + addressField.value() + '/api/' + usernameField.value() + '/lights/'
   httpDo(url, 'GET', getLights)
   groupUrl = "http://" + addressField.value() + '/api/' + usernameField.value() + '/groups/'
   httpDo(groupUrl, 'GET', getGroups)
+
 }
 
 /*
@@ -51,6 +55,12 @@ function getLights(result) {
     select('main').child(controlDiv)
   }
 }
+
+function getScenes(result){
+  allScenes = JSON.parse(result)
+  console.log('Scenes: ', allScenes)
+}
+
 function getGroups(result) {
   let ALL = JSON.parse(result)
 
@@ -58,43 +68,55 @@ function getGroups(result) {
   //we're sometimes only interested in som of the groups, K2 
   //K2 = Object.values(K2)[0]
 
-  console.log(ALL)
+  console.log('Groups: ', ALL)  
   //create group controls
   for(group in ALL){
-    console.log(ALL[group].name)
     let K2 = ALL[group]
     let groupDiv = createElement('div').addClass('light')
     groupDiv.html('<h2>Gruppe: ' + K2.name + '</h2>')
+
     let body = {
       "hue": K2.action.hue,
       "bri": K2.action.bri,
       "sat": 254,
-      "on": K2.action.on,
+      "on": K2.state.all_on,
     }
+    let groupNumber = group
+
+    let check = createInput()                   // an input for the on property
+    check.attribute('type', 'checkbox')     // make this input a checkbox
+    K2.state.all_on && check.attribute('checked', 'checked')    // is called 'checked'
+        // set the mouseClicked callback
+      check.mouseClicked(()=>{
+        body.on =  check.elt.checked 
+        console.log('number: ', groupNumber)
+        setGroup(groupNumber, 'action', body)
+      })      
+
     let brightness = createSlider(0,254, K2.action.bri).mouseReleased(()=>{
       body.bri = brightness.value()
-      setGroup(K2.name, 'action', body)
+      setGroup(groupNumber, 'action', body)
     })
     let red = createButton('red').mouseReleased(()=>{
       body.hue = 65535
-      setGroup(K2.name, 'action', body)
+      setGroup(groupNumber, 'action', body)
     })
     let green = createButton('green').mouseReleased(()=>{
       body.hue = 25500
-      setGroup(K2.name, 'action', body)
+      setGroup(groupNumber, 'action', body)
     })
     let blue = createButton('blue').mouseReleased(()=>{
       body.hue = 46920
-      setGroup(K2.name, 'action', body)
+      setGroup(groupNumber, 'action', body)
     })
-    let hueInput = createInput(K2.action.hue).mouseReleased(()=>{
-      body.hue = hueInput.value()
-      setGroup(K2.name, 'action', body)
-    })
-    let satInput = createInput(K2.action.sat).mouseReleased(()=>{
-      body.sat = satInput.value()
-    })
-    hueSatBtn = createButton('set').mouseReleased(()=>setGroup(K2.name, 'action', body))
+    // let hueInput = createInput(K2.action.hue).mouseReleased(()=>{
+    //   body.hue = hueInput.value()
+    //   setGroup(K2.name, 'action', body)
+    // })
+    // let satInput = createInput(K2.action.sat).mouseReleased(()=>{
+    //   body.sat = satInput.value()
+    // })
+    // hueSatBtn = createButton('set').mouseReleased(()=>setGroup(K2.name, 'action', body))
   
   
     // // let currentColor = ColorConverter.xyBriToRgb(K2.action.xy[0], K2.action.xy[1], K2.action.bri)
@@ -121,13 +143,16 @@ function getGroups(result) {
     // pickerDiv.child(picker)
     // pickerDiv.child(pickerBtn)
     let infoDiv = createElement('h3', group)
+
     let brightnessDiv = createElement('div', '<label>brightness</label>')
     brightnessDiv.child(brightness)
     let colorDiv = createElement('div', '<label>color</label>')
     colorDiv.child(red)
     colorDiv.child(green)
     colorDiv.child(blue)
+
     groupDiv.child(infoDiv)
+    groupDiv.child(check)
     groupDiv.child(brightnessDiv)
     groupDiv.child(colorDiv)
     // groupDiv.child(hueSatDiv)
