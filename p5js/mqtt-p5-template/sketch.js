@@ -7,12 +7,11 @@ function setup() {
   connectionDiv = select('#connection')
   //det første vi gør her, er at oprette forbindelse til mqtt serveren - selve funktionen kan ses længere nede
   mqttInit()
-  client.subscribe('recording')
-  client.subscribe('kmg001/+')
+  client.subscribe('minfar')
   //når vi modtager beskeder fra MQTT serveren kaldes denne funktion
   client.on('message', (topic, message) => {
     console.log('Received Message: ' + message.toString() + '\nOn topic: ' + topic)
-    select('#hum').html('X på eriks m5: ' + message )
+    select('#connection').html( 'Received Message: ' + message.toString() + '\nOn topic: ' + topic )
   })  
 }
 
@@ -58,18 +57,7 @@ const mqttInit = () => {
   const options = {
     keepalive: 300,
     clientId: clientId,
-    protocolId: 'MQTT',
-    protocolVersion: 4,
-    clean: true,
     reconnectPeriod: 1000,
-    connectTimeout: 30 * 1000,
-    will: {
-      topic: 'WillMsg',
-      payload: 'Connection Closed abnormally..!',
-      qos: 0,
-      retain: false
-    },
-    rejectUnauthorized: false
   }
 
   console.log('connecting mqtt client')
