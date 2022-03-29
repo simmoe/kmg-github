@@ -9,6 +9,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "dgram": "^1.0.1"
+    "dgram": "^1.0.1",
+    "express": "^4.17.3",
+    "http": "^0.0.1-security",
+    "ip": "^1.1.5",
+    "socket.io": "^4.4.1"
   }
 }
