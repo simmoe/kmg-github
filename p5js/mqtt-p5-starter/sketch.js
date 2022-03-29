@@ -13,7 +13,7 @@ function setup() {
   //når vi modtager beskeder fra MQTT serveren kaldes denne funktion
   client.on('message', (topic, message) => {
     console.log('Received Message: ' + message.toString() + '\nOn topic: ' + topic)
-    select('#messages').html('Received message: ' + message )
+    connectionDiv.html('Received message: ' + message )
     message = JSON.parse(message)
     console.log(message.battery)
     let exist = controllers.find( controller => controller.name == message.name )
