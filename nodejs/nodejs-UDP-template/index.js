@@ -6,6 +6,8 @@ const http = require('http')
 const server = http.createServer(app)
 const { Server } = require("socket.io")
 const io = new Server(server)
+
+const port = 3000;
 app.use(express.static('public'))
 
 server.listen(4000, () => {
@@ -14,7 +16,7 @@ server.listen(4000, () => {
 
 io.on('connection', (socket) => {
   console.log('a user connected')
-  io.emit('ip', ip.address())
+  io.emit('ip', ip.address()+":"+port)
 })
 
 //UDP TING
@@ -35,13 +37,15 @@ var udpSocket = udp.createSocket('udp4')
 udpSocket.on('listening',function(){
   var address = udpSocket.address();
   var port = address.port;
-  console.log('UDP Socket is listening at: ' + address.address + ":" + port);
+  console.log('UDP Socket is listening at: ' + address.address + " : " + port);
 });
 
-//Når en får en besked
+//Når den får en besked
 udpSocket.on('message',function(msg,info){
+  
   console.log('Data received from client : ' + msg.toString());
   console.log('Received %d bytes from %s:%d\n',msg.length, info.address, info.port);
+  io.emit('list', msg.toString())
 });
 
 //Hvis der skar en fejl
@@ -51,4 +55,4 @@ udpSocket.on('error', (err) => {
 });
 
 // port, ip adresse, callback
-udpSocket.bind(3000,ip.address(),false);
+udpSocket.bind(port,ip.address(),false);

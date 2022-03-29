@@ -1,14 +1,34 @@
 //currentpage skal pege på det side-id der skal være aktivt først (fra html filen) 
 let currentPage = '#side-1'
-
+let listSlots = [];
 function setup(){
   var socket = io()
+  for(let i = 0; i <= 40;i++){
+    let list = select('#list')
+    let element = createP("")
+    element.addClass("faded")
+    element.parent(list)
+    listSlots[i] = {el:element,faded:true}
+  }
   socket.on('ip', (msg) => {
     select('#ip').html('Ip adresse: ' + msg)
   });
+  socket.on('list', (msg)=>{
+    for(let i = 0; i < listSlots.length;i++){
+      if(listSlots[i].faded){
+        listSlots[i].el.removeClass("fade")
+        listSlots[i].el.html(""+msg)
+        listSlots[i].faded = false;
+        setTimeout(()=>{
+          listSlots[i].faded = true
+          listSlots[i].el.addClass("fade");
+        },8000)
+        break
+      }
+
+    }
+  })
 }
-
-
 
 
 
