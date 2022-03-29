@@ -1,11 +1,40 @@
 //currentpage skal pege på det side-id der skal være aktivt først (fra html filen) 
 let currentPage = '#side-1'
-
+let data;
 function setup(){
+  createCanvas(document.body.clientWidth, document.body.clientHeight)
+  background(0)
   var socket = io()
   socket.on('activity', (msg) => {
-    console.log('message: ' + msg);
+    data = msg;
+    console.log(msg);
+    
   });
+}
+function drawData(){
+  for(let i = 0; i<data.features.length;i++ ){
+    if(!data.features[i].geometry) continue
+    let x = data.features[i].geometry.coordinates[0][0]
+    let y = data.features[i].geometry.coordinates[0][1]
+    x = map(x,12.45,12.6,0,900);
+    y = map(y,55.6,55.77,0,500)
+    let name = data.features[i].properties.navn
+    fill(255)
+    circle(x,y,10)
+    fill(255,0,0)
+    textAlign(CENTER,CENTER);
+    text(name,x,y)
+
+  }
+}
+function windowResized() {
+  resizeCanvas(document.body.clientWidth, document.body.clientHeight);
+}
+
+function draw(){
+  background(0)
+  if(data != undefined)
+  drawData()
 }
 
 
