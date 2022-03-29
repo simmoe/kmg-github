@@ -34,19 +34,18 @@ var udpSocket = udp.createSocket('udp4')
 
 
 //Når den er klar til at få beskeder
-udpSocket.on('listening',function(){
-  var address = udpSocket.address();
-  var port = address.port;
+udpSocket.on('listening', () => {
+  var address = udpSocket.address()
+  var port = address.port
   console.log('UDP Socket is listening at: ' + address.address + " : " + port);
-});
+})
 
 //Når den får en besked
-udpSocket.on('message',function(msg,info){
-  
+udpSocket.on('message', (msg, info) => {  
   console.log('Data received from client : ' + msg.toString());
   console.log('Received %d bytes from %s:%d\n',msg.length, info.address, info.port);
   io.emit('list', msg.toString())
-});
+})
 
 //Hvis der skar en fejl
 udpSocket.on('error', (err) => {
