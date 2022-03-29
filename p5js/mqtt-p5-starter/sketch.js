@@ -9,12 +9,13 @@ function setup() {
   connectionDiv = select('#connection')
   //det første vi gør her, er at oprette forbindelse til mqtt serveren - selve funktionen kan ses længere nede
   mqttInit()
-  client.subscribe('messaging')
+  client.subscribe('programmering')
   //når vi modtager beskeder fra MQTT serveren kaldes denne funktion
   client.on('message', (topic, message) => {
     console.log('Received Message: ' + message.toString() + '\nOn topic: ' + topic)
-    message = JSON.parse(message)
     select('#messages').html('Received message: ' + message )
+    message = JSON.parse(message)
+    console.log(message.battery)
     let exist = controllers.find( controller => controller.name == message.name )
     if(exist){
       console.log('already have that controller, updating battery state')
@@ -24,14 +25,21 @@ function setup() {
       controllers.push(message)      
     }
     console.log(controllers)
-    //update chart 
-    let labels = []
-    let values = []
-    controllers.map( controller => {
-      labels.push(controller.name)
-      values.push(controller.battery)
+
+    let htmlList = select('#controllers')
+    htmlList.html('')
+    controllers.map( c => {
+      htmlList.child(createElement('li', c.name + ': ' + c.battery))
     })
-    showChart(labels,values)
+
+    // //update chart 
+    // let labels = []
+    // let values = []
+    // controllers.map( controller => {
+    //   labels.push(controller.name)
+    //   values.push(controller.battery)
+    // })
+    // showChart(labels,values)
   })  
 }
 
@@ -48,9 +56,15 @@ const mqttInit = () => {
   }
 
   console.log('connecting mqtt client')
-
+  
   //forsøg at oprette forbindelse 
   client = mqtt.connect(host, options)
+  
+  //hvis forbindelsen lykkes kaldes denne funktion
+  client.on('connect', (t, m) => {
+    console.log('Client connected:' + clientId, t)
+    connectionDiv.html('You are now connected to mqtt.nextservices.dk, with client id: ' + clientId)
+  })
 
   //hvis der sker en fejl kaldes denne funktion
   client.on('error', (err) => {
@@ -61,12 +75,6 @@ const mqttInit = () => {
   //og hvis forbindelsen mistes kaldes denne funktion
   client.on('reconnect', () => {
     console.log('Reconnecting...')
-  })
-
-  //hvis forbindelsen lykkes kaldes denne funktion
-  client.on('connect', (t, m) => {
-    console.log('Client connected:' + clientId, t)
-    connectionDiv.html('<p>You are now connected to mqtt.nextservices.dk</p>')
   })
 
   //når forbindelsen lukkes kaldes denne funktion
