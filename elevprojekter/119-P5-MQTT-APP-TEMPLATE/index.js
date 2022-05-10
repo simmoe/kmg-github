@@ -16,6 +16,7 @@ function setup(){
         client.subscribe('taptapServer')
 
         select('#frontpage').mousePressed( ()=>{
+            toggleFullScreen()
             timer = 25
             points = 0
             client.publish('taptap', 'start')
@@ -39,6 +40,13 @@ function setup(){
         })
     })
 }
+
+function toggleFullScreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+    }
+  }
+
 
 function shiftPage( newPage ){
     if(newPage != currentPage){
