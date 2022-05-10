@@ -7,6 +7,17 @@
     font-family:'Roboto';
 }
 
+#frontpage h1, #timer h1{
+    border:8px solid white;
+    border-radius:50%;
+    height:30vh;
+    width:30vh;
+    display:grid;
+    place-items:center;
+    cursor: pointer;
+    font-size:5rem;
+}
+
 body{
     height:100vh;
     width:100vw;
