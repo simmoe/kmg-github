@@ -28,7 +28,7 @@ function setup(){
                 if(timer == 0){
                     client.publish('taptap', 'idle')
                     clearInterval(interval)
-                    select('#pointsHeader').html(points)
+                    select('#pointsHeader').html('Du fik ' + points + ' point' )
                     shiftPage('#points')
                 }
             }, 1000)
