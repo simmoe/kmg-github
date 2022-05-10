@@ -41,7 +41,6 @@ export const keys = [
             where:'K2-Hue-Footbutton',
             key:'49E57DD8'
         },
-        45d9f7bb
         {
             name:'stick-1009',
             where:'K2-Office-Actuator',

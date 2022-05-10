@@ -37,7 +37,7 @@ var udpSocket = udp.createSocket('udp4')
 udpSocket.on('listening', () => {
   var address = udpSocket.address()
   var port = address.port
-  console.log('UDP Socket is listening at: ' + address.address + " : " + port);
+  console.log('UDP Socket is listening at: ' + address.address + ":" + 4000);
 })
 
 //Når den får en besked
