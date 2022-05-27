@@ -51,6 +51,11 @@ export const keys = [
             where:'K2-Rainbow-Stick',
             key:'C91CC05D'
         },
+        {
+            name:'K2-Light-Handle',
+            where:'K2',
+            key:'9BFE258D'
+        },
     ],
     'atom'=
     [

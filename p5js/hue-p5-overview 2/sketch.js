@@ -54,7 +54,9 @@ function getGroups(result) {
   let K2 = JSON.parse(result)
   //were only interested in the first group, K2 
   K2 = Object.values(K2)[0]
-  //console.log(K2)
+  let FROG = Object.values(K2)[6]
+  //console.log('frog', FROG)
+
   let groupDiv = createElement('div').addClass('light')
   groupDiv.html('<h2>Gruppe: ' + K2.name + '</h2>')
   let body = {
@@ -250,7 +252,7 @@ the properties of the lights
 */
 function setLight(lightNumber, data, command) {
   var path = url + lightNumber + '/' + command 		  // assemble the full URL
-  console.log('setting ' + path)
+  console.log('setting ', path, data)
   var content = JSON.stringify(data)				        // convert JSON obj to string
   httpDo( path, 'PUT', content, 'text', setLightsCallback)  //HTTP PUT the change
 }
