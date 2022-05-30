@@ -17,6 +17,11 @@ export const keys = [
             key:'6FE718DC'
         },
         {
+            name:'Infinity mirror',
+            where:'k2',
+            key:'609B0A08'
+        },
+        {
             name:'stick-1004',
             where:'k2-klatrebane',
             key:'0F9643CE'
