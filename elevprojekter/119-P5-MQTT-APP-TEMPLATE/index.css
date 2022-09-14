@@ -1,0 +1,98 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap');
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Roboto';
+}
+
+#frontpage h1, #timer h1{
+    border:8px solid white;
+    border-radius:50%;
+    height:50vh;
+    width:50vh;
+    display:grid;
+    place-items:center;
+    cursor: pointer;
+    font-size:3rem;
+}
+
+h1{
+    font-size:2rem;
+}
+
+body{
+    height:100vh;
+    width:100vw;
+    overflow:hidden;
+}
+
+.page{
+    height:100vh;
+    width:100vw;
+    overflow:hidden;
+    position:fixed;
+    top:0;
+    left:-100vw;
+    display:grid;
+    place-items:center;
+    transition:all .4s ease-in-out;
+    z-index:1;
+}
+
+.show{
+    left:0;
+    z-index:2;
+}
+
+footer{
+    position:fixed;
+    bottom:0;
+    height:15vh;
+    width:100vw;
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    place-items:center;
+    z-index:3;
+}
+
+.material-symbols-outlined {
+    transform:scale(200%);
+    color:white;
+}
+
+#frontpage{
+    background-color:orangered;
+    color:white;
+}
+#timer{
+    background-color:green;
+    color:white;
+}
+#points{
+    background: rgb(108,253,232);
+    background: radial-gradient(circle, rgba(108,253,232,1) 59%, rgba(78,168,176,1) 100%);
+    color:white;
+}
+main{
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    place-items: center;
+    gap: 2rem;
+}
+.textMain{
+    display: grid;
+    place-items: center;
+    gap: 2rem;
+    font-size: 4rem;
+}
+#restart{
+    padding: 1rem;
+    border-radius: 15px;
+    font-size: 2rem;
+    background-color: darkslateblue;
+    color: white;
+    border: 2px solid white;
+    box-shadow: 0 2px 5px rgb(0,0,0,0.5);
+}

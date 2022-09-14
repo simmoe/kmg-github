@@ -1,0 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap');
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Open Sans';
+}
+
+#udp-messages {
+  padding: 2rem;
+  width:100%;
+  height:40vh;
+  border-radius: 2rem;
+  background-color: lightblue;
+  overflow:scroll;
+}
+
+.page {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+
+  display: grid;
+  place-items: center;
+  grid-template-rows: 1fr 10fr;
+  padding: 2rem;
+  background-color: aliceblue;
+}

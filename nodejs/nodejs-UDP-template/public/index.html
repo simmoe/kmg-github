@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0 maximum-scale=1.0,user-scalable=0">
+    <title>UDP receiver client with p5</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="shortcut icon" href="ddu.ico" type="image/x-icon">
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.3.1/p5.min.js" crossorigin="anonymous"></script>
+    <script src="sketch.js"></script>
+</head>
+<body>
+    <div id="side-1" class="page show">
+        <div class="ipContainer">
+            <h2 id="ip">ip adresse</h2>
+            <hr>
+            <p>Denne side er hostet af en node.js server. Den modtager besked fra serveren og viser det når der kommer UDP kommunikation.</p>
+        </div>
+        <div id="udp-messages"></div>
+    </div>
+</body>
+</html>
