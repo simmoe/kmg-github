@@ -17,6 +17,16 @@ export const keys = [
             key:'6FE718DC'
         },
         {
+            name:'Reaction board - lys main',
+            where:'k2',
+            key:'9F288021'
+        },
+        {
+            name:'Reaction board - LED',
+            where:'k2',
+            key:'35717D08'
+        },
+        {
             name:'Infinity mirror',
             where:'k2',
             key:'609B0A08'
