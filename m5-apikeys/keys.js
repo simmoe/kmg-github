@@ -71,9 +71,9 @@ export const keys = [
             key:'6EA27505'
         },
         {
-            name:'2',
-            where:'k2',
-            key:'7DD009A3'
+            name:'ejderstedgade vitrine',
+            where:'ejdersted',
+            key:'4E7F1DD6'
         },
         {
             name:'3',
