@@ -1,6 +1,6 @@
 let client 
 let connectionDiv
-let groups = []
+let groups = {}
 
 function setup() {
   connectionDiv = select('#connection')
@@ -12,24 +12,19 @@ function setup() {
   client.on('message', async (topic, message) => {
     console.log('Received Message: ' + message.toString() + '\nOn topic: ' + topic)
     connectionDiv.html('Received message: ' + message )
-	if (topic.startsWith('lokale304/')) {
-		let group = topic.split('/')[1]
+    if (topic.startsWith('escaperoom/')) {
+      let group = topic.split('/')[1]
 
-		if (!groups.includes(group)) {
-			groups.push({
-				name: group,
-				msg: message,
-			})
-		}
+      groups[group] = message
 
-		let htmlList = select('#controllers')
-		htmlList.html('')
+      let htmlList = select('#controllers')
+      htmlList.html('')
 
-		groups.map( g => {
-			htmlList.child(createElement('li', g.name + ': ' + g.msg))
-		})
-	}
-  })  
+      for (const [key, value] of Object.entries(groups)) {
+        htmlList.child(createElement('li', key + ': ' + value))
+      }
+    }
+  })
 }
 
 
