@@ -41,11 +41,15 @@ export const keys = [
             where:'K2-Hue-Footbutton',
             key:'49E57DD8'
         },
-        45d9f7bb
         {
             name:'stick-1009',
             where:'K2-Office-Actuator',
             key:'9CBA7418'
+        },
+        {
+            name:'ejdersted-2-lys',
+            where:'Ejderstedgade',
+            key:'9ED534D7'
         },
         {
             name:'stick-1010',
