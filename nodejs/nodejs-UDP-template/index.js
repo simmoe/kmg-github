@@ -6,7 +6,32 @@ const server = http.createServer(app)
 const { Server } = require("socket.io")
 const io = new Server(server)
 
-const port = 4000;
+
+const readline = require('readline');
+
+readline.emitKeypressEvents(process.stdin);
+process.stdin.setRawMode(true);
+
+process.stdin.on('keypress', (key, data) => {
+  if (data && data.name === 'up') {
+    console.log('Up arrow pressed');
+
+  } else if (data && data.name === 'down') {
+    sendUdp('down')
+    console.log('Down arrow pressed');
+  } else if (data && data.name === 'left') {
+    console.log('Left arrow pressed');
+  } else if (data && data.name === 'right') {
+    console.log('Right arrow pressed');
+  } else if (key === '\u0003') {
+    console.log('CTRL-C pressed, exiting...');
+    process.exit();
+  } else {
+    console.log(`Key pressed: ${key}`);
+  }
+});
+
+const port = 4444;
 app.use(express.static('public'))
 
 server.listen(port, () => {
@@ -41,8 +66,8 @@ udpSocket.on('listening', () => {
 
 //Når den får en besked
 udpSocket.on('message', (msg, info) => {  
-  console.log('Data received from client : ' + msg.toString());
-  console.log('Received %d bytes from %s:%d\n',msg.length, info.address, info.port);
+  //console.log('Data received from client : ' + msg.toString());
+  //console.log('Received %d bytes from %s:%d\n',msg.length, info.address, info.port);
   io.emit('udp-message', msg.toString())
 })
 
@@ -54,3 +79,16 @@ udpSocket.on('error', (err) => {
 
 // port, ip adresse, callback
 udpSocket.bind(port,ip.address(),false);
+
+
+const sendUdp = (message) => {
+  udpSocket.send(message, port, ip.address(), (error) => {
+    if (error) {
+      console.error(error);
+      udpSocket.close();
+    } else {
+      console.log('Message sent successfully');
+      udpSocket.close();
+    }
+  });
+}
