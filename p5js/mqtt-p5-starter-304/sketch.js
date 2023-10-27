@@ -11,7 +11,7 @@ function setup() {
 
   client.on('message', async (topic, message) => {
     console.log('Received Message: ' + message.toString() + '\nOn topic: ' + topic)
-    connectionDiv.html('Received message: ' + message )
+    connectionDiv.html('Received message: ' + message + ' on topic ' + topic)
     if (topic.startsWith('escaperoom/')) {
       let group = topic.split('/')[1]
 
