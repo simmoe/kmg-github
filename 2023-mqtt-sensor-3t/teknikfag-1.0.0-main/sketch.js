@@ -7,19 +7,18 @@ function setup() {
 
   mqttInit()
 
-  client.subscribe('#')
+  client.subscribe('malik/#')
 
   client.on('message', async (topic, message) => {
     console.log('Received Message: ' + message.toString() + '\nOn topic: ' + topic)
-    connectionDiv.html('Received message: ' + message + ' on topic ' + topic)
-    if (topic.startsWith('escaperoom/')) {
+    connectionDiv.html('Received message: ' + message )
+    if (topic.startsWith('malik/')) {
       let group = topic.split('/')[1]
 
       groups[group] = message
 
       let htmlList = select('#controllers')
       htmlList.html('')
-
       for (const [key, value] of Object.entries(groups)) {
         htmlList.child(createElement('li', key + ': ' + value))
       }
