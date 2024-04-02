@@ -3,6 +3,8 @@ const express = require('express')
 const app = express()
 const http = require('http')
 const server = http.createServer(app)
+
+//Socket io kommunikerer med hjemmesifden som hostes i /public
 const { Server } = require("socket.io")
 const io = new Server(server)
 
@@ -21,8 +23,10 @@ process.stdin.on('keypress', (key, data) => {
     console.log('Down arrow pressed');
   } else if (data && data.name === 'left') {
     console.log('Left arrow pressed');
+    sendUdp('left')
   } else if (data && data.name === 'right') {
     console.log('Right arrow pressed');
+    sendUdp('right')
   } else if (key === '\u0003') {
     console.log('CTRL-C pressed, exiting...');
     process.exit();
@@ -32,12 +36,14 @@ process.stdin.on('keypress', (key, data) => {
 });
 
 const port = 4444;
+//hoster mappen /public på porten 
 app.use(express.static('public'))
 
 server.listen(port, () => {
-  console.log('client available on on *:4000');
+  console.log('client available on on *:4444');
 })
 
+//når hjemmesiden er klar 
 io.on('connection', (socket) => {
   console.log('a user connected')
   io.emit('ip', ip.address() + ":" + port)
@@ -88,7 +94,7 @@ const sendUdp = (message) => {
       udpSocket.close();
     } else {
       console.log('Message sent successfully');
-      udpSocket.close();
+      //udpSocket.close();
     }
   });
 }
