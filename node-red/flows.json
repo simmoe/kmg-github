@@ -1,0 +1,230 @@
+[
+    {
+        "id": "e90c3ee1b18176cd",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "02675b0504bb77f6",
+        "type": "mqtt-broker",
+        "name": "NEXT",
+        "broker": "mqtt.nextservices.dk",
+        "port": "0",
+        "tls": "",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": true,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "6755fc711b34ed47",
+        "type": "firebase admin",
+        "name": "Firestore MQTT"
+    },
+    {
+        "id": "7e3f74a160ea08ed",
+        "type": "mqtt in",
+        "z": "e90c3ee1b18176cd",
+        "name": "MQTT receiver",
+        "topic": "/wek/inputs",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "02675b0504bb77f6",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 300,
+        "y": 240,
+        "wires": [
+            [
+                "92b6eebdac2b7eb8"
+            ]
+        ]
+    },
+    {
+        "id": "e26f3d66cc487b67",
+        "type": "debug",
+        "z": "e90c3ee1b18176cd",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 640,
+        "y": 640,
+        "wires": []
+    },
+    {
+        "id": "0634a67b5ccc09eb",
+        "type": "osc",
+        "z": "e90c3ee1b18176cd",
+        "name": "OSC sender",
+        "path": "/wek/inputs",
+        "metadata": false,
+        "x": 510,
+        "y": 340,
+        "wires": [
+            [
+                "df89b71548c06678"
+            ]
+        ]
+    },
+    {
+        "id": "df89b71548c06678",
+        "type": "udp out",
+        "z": "e90c3ee1b18176cd",
+        "name": "UDP OSC OUT",
+        "addr": "127.0.0.1",
+        "iface": "",
+        "port": "6448",
+        "ipv": "udp4",
+        "outport": "",
+        "base64": false,
+        "multicast": "broad",
+        "x": 700,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "92b6eebdac2b7eb8",
+        "type": "function",
+        "z": "e90c3ee1b18176cd",
+        "name": "function 1",
+        "func": "// Antag at resten af msg.payload er et objekt baseret på din debug output\nvar data = msg.payload;\n\n// Konstruer OSC-beskeden\nvar oscMessage = [\n        {\n            type: \"f\", // type \"f\" for flydende punkt nummer, repræsenterer 'x' værdien fra accelerometer\n            value: data.x\n        },\n        {\n            type: \"f\", // type \"f\" for flydende punkt nummer, repræsenterer 'y' værdien fra accelerometer\n            value: data.y\n        },\n        {\n            type: \"f\", // type \"f\" for flydende punkt nummer, repræsenterer 'y' værdien fra accelerometer\n            value: data.xacc\n        },\n        {\n            type: \"f\", // type \"f\" for flydende punkt nummer, repræsenterer 'y' værdien fra accelerometer\n            value: data.yacc\n        },\n        {\n            type: \"f\", // type \"f\" for flydende punkt nummer, repræsenterer 'y' værdien fra accelerometer\n            value: data.zacc\n        },\n        {\n            type: \"f\", // type \"f\" for flydende punkt nummer, repræsenterer 'y' værdien fra accelerometer\n            value: data.xgyr\n        },\n        {\n            type: \"f\", // type \"f\" for flydende punkt nummer, repræsenterer 'y' værdien fra accelerometer\n            value: data.ygyr\n        },\n        {\n            type: \"f\", // type \"f\" for flydende punkt nummer, repræsenterer 'y' værdien fra accelerometer\n            value: data.zgyr\n        }\n        // Du kan tilføje 'z' værdien eller andre værdier som nødvendigt\n]\n// Opdaterer msg.payload til at indeholde OSC beskedstrukturen\nmsg.payload = oscMessage;\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 340,
+        "y": 340,
+        "wires": [
+            [
+                "0634a67b5ccc09eb"
+            ]
+        ]
+    },
+    {
+        "id": "3296177a88dae502",
+        "type": "udp in",
+        "z": "e90c3ee1b18176cd",
+        "name": "UDP IN",
+        "iface": "",
+        "port": "8000",
+        "ipv": "udp4",
+        "multicast": "false",
+        "group": "255.0.18.83",
+        "datatype": "buffer",
+        "x": 350,
+        "y": 440,
+        "wires": [
+            [
+                "4306a7a5baa350eb"
+            ]
+        ]
+    },
+    {
+        "id": "4306a7a5baa350eb",
+        "type": "osc",
+        "z": "e90c3ee1b18176cd",
+        "name": "",
+        "path": "",
+        "metadata": false,
+        "x": 490,
+        "y": 440,
+        "wires": [
+            [
+                "209777d266c10de0"
+            ]
+        ]
+    },
+    {
+        "id": "209777d266c10de0",
+        "type": "rbe",
+        "z": "e90c3ee1b18176cd",
+        "name": "",
+        "func": "rbe",
+        "gap": "",
+        "start": "",
+        "inout": "out",
+        "septopics": true,
+        "property": "payload",
+        "topi": "topic",
+        "x": 630,
+        "y": 440,
+        "wires": [
+            [
+                "56cee19f8d284e98",
+                "e26f3d66cc487b67"
+            ]
+        ]
+    },
+    {
+        "id": "1fe1d349bcf1b721",
+        "type": "mqtt out",
+        "z": "e90c3ee1b18176cd",
+        "name": "MQTT Out",
+        "topic": "vores-emne",
+        "qos": "0",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "02675b0504bb77f6",
+        "x": 650,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "56cee19f8d284e98",
+        "type": "function",
+        "z": "e90c3ee1b18176cd",
+        "name": "function 2",
+        "func": "// Antag at resten af msg.payload er et objekt baseret på din debug output\nvar data = msg.payload;\n\n// Konstruer OSC-beskeden\nvar MQTTMessage \n\n//Konstruerer message \nif(data == \"1\"){\n    MQTTMessage = \"music 1\"\n}\n\nif(data == \"2\"){\n    MQTTMessage = \"music 2\"\n}\n\nif(data == \"3\"){\n    MQTTMessage = \"ryst\"\n}\n\nif(data == \"4\"){\n    MQTTMessage = \"uendelig\"\n}\n\nif(data == \"5\"){\n    MQTTMessage = \"elevator\"\n}\n\n// Opdaterer msg.payload til at indeholde OSC beskedstrukturen\nmsg.payload = MQTTMessage;\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 560,
+        "wires": [
+            [
+                "1fe1d349bcf1b721",
+                "e26f3d66cc487b67"
+            ]
+        ]
+    }
+]
