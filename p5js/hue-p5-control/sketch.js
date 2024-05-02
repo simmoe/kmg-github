@@ -1,8 +1,8 @@
 //https://developers.meethue.com/develop/get-started-2/core-concepts/
 
-var ip = '10.78.65.185' // the hub IP address
-var username = 'kgMgko5iDYljmA3ERym5GDibEkDzQTxutUSDqN36';       // fill in your Hub-given username here
-var myLight = 2
+var ip = '10.78.16.62' // the hub IP address
+var username = '9KFAI6wHBBm1mQtUkNdIpRp-AqncLHz3KZg0W29S';       // fill in your Hub-given username here
+var myLight = 1
 var usernameField, addressField, connectButton;
 
 var controlArray = [] // array of light control divs
@@ -24,7 +24,7 @@ to get the light data
 function connect() {
   this.html("refresh")      // change the connect button to 'refresh'
   select('main').html('')   //empty the webpage
-  url = "http://" + addressField.value() + '/api/' + usernameField.value() + '/lights/' + myLight + '/'
+  url = "http://" + addressField.value() + '/api/' + usernameField.value() + '/lights/' + myLight  + '/'
   httpDo(url, 'GET', getLight)
 }
 
