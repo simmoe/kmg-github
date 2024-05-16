@@ -5,6 +5,17 @@ function setup(){
 
 }
 
+//kald funktionen med det page id du vil vise 
+function shiftPage(id){
+  select(currentPage).removeClass('show')
+  select(id).addClass('show')
+  currentPage = id
+}
+
+//skift side med numeriske taster 
+function keyPressed(){
+  shiftPage('#side-' + key)
+}
 
 
 
