@@ -1,27 +1,45 @@
+let col = 'Klima'
+let doc = 'Mandag'
+let docModel 
+
 function setup() {
-    getData('Klima', 'Mandag')    
-}
-
-
-//helper functions to move div's with class page 
-function goRight(){
-    position++
-    selectAll('.page').map( e => e.style('transform', 'translateX(' + position * -100 + 'vw)') )
-}
-
-function getData(collection, doc){
-    db.collection(collection).doc(doc)
+    //hent collection og doc
+    db.collection(col).doc(doc)
     .onSnapshot( doc => {
-        console.log(doc.data())
+        console.log('snapshot hentet', doc.data())
+        docModel = doc.data()
+        for (const property in docModel) {
+            console.log(property, docModel[property]);
+            let li = createElement('li', property + ': ' +  docModel[property])
+            select('#data').child(li)
+        }
     })
+
+    createButton('get document')
+    .mousePressed( function(){
+        getData(col, doc)
+            .then( ()=>{
+                console.log(docModel)
+            }
+        )
+    })
+    .position(100, 100)
+
+    createButton('set document')
+    .mousePressed( function(){
+        console.log(docModel)
+        setData(col, doc, { 
+            "Her": "er"
+        })
+    })
+    .position(100, 150)
 }
 
-    //  UNCOMMENT THIS TO TRACK ANALYTICS PARAMETERS
-    //  analytics.logEvent('trigger_name', { label_name: 'a user just fired the trigger_name dimension'});
+async function getData(collection, doc){
+}
 
-
-function addData(collection, doc, data){
-    // Add a new document in collection "cities"
+async function setData(collection, doc, data){
+    // Add a new document in collection 
     db.collection(collection).doc(doc).set(data)
     .then(() => {
         console.log("Document successfully written!")
@@ -30,5 +48,3 @@ function addData(collection, doc, data){
         console.error("Error writing document: ", error)
     });
 }
-
-
