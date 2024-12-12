@@ -17,6 +17,11 @@ export const keys = [
             key:'6FE718DC'
         },
         {
+            name:'wall-led',
+            where:'k2-office-wall-led',
+            key:'CBE8C351'
+        },
+        {
             name:'Reaction board - lys main',
             where:'k2',
             key:'9F288021'
