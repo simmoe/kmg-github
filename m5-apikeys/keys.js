@@ -17,31 +17,6 @@ export const keys = [
             key:'6FE718DC'
         },
         {
-            name:'office-wall-christmas',
-            where:'k2-wall-christmas',
-            key:'F36A39C6'
-        },
-        {
-            name:'wall-led',
-            where:'k2-office-wall-led',
-            key:'CBE8C351'
-        },
-        {
-            name:'Reaction board - lys main',
-            where:'k2',
-            key:'9F288021'
-        },
-        {
-            name:'Reaction board - LED',
-            where:'k2',
-            key:'35717D08'
-        },
-        {
-            name:'Infinity mirror',
-            where:'k2',
-            key:'609B0A08'
-        },
-        {
             name:'stick-1004',
             where:'k2-klatrebane',
             key:'0F9643CE'
@@ -68,18 +43,18 @@ export const keys = [
         },
         {
             name:'stick-1009',
-            where:'K2-Office-Pir',
-            key:'BEF58A6C'
+            where:'K2-Office-Actuator',
+            key:'9CBA7418'
+        },
+        {
+            name:'ejdersted-2-lys',
+            where:'Ejderstedgade',
+            key:'9ED534D7'
         },
         {
             name:'stick-1010',
             where:'K2-Rainbow-Stick',
             key:'C91CC05D'
-        },
-        {
-            name:'K2-Light-Handle',
-            where:'K2',
-            key:'9BFE258D'
         },
     ],
     'atom'=
@@ -100,9 +75,9 @@ export const keys = [
             key:'6EA27505'
         },
         {
-            name:'2',
-            where:'k2',
-            key:'7DD009A3'
+            name:'ejderstedgade vitrine',
+            where:'ejdersted',
+            key:'4E7F1DD6'
         },
         {
             name:'3',

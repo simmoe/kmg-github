@@ -1,0 +1,171 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+.shadowbox, .shadowboxToo{
+    width:40rem;
+    height:40rem;
+    background:rgba(255, 255, 255, .1);
+    border-radius: 4rem;
+    padding:4rem;
+    border: 1px solid rgba(255, 255, 255, .5);
+    transition: 1s ease-in-out all;
+    animation: moveme infinite 22s;
+    position:fixed;
+    z-index:-1;
+}
+.shadowboxToo{
+    animation: movemeToo infinite 14s;
+}
+
+@keyframes moveme {
+    20% {
+        width: 20rem;
+        height: 40%;
+    }
+    40% {
+        width: 100rem;
+        height: 80rem;
+        left:0;
+    }
+    600% {
+        width: 98vw;
+        height: 98vh;
+    }
+    80% {
+        width: 120rem;
+        height: 50vh;
+    }
+}
+@keyframes movemeToo {
+    20% {
+        width: 80vw;
+        height: 200rem;
+    }
+    40% {
+        width: 100rem;
+        height: 100rem;
+        margin-left:40%;
+    }
+    600% {
+        width: 50vw;
+        height: 98vh;
+    }
+    80% {
+        width: 120rem;
+        height: 120rem;
+    }
+}
+
+
+
+#defaultCanvas0 {
+    position: fixed;
+    z-index: 10;
+    top: 0;
+    left: 0;
+}
+.page {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    padding: 12rem;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+    transform: scale(0);
+    transition: 0.7s 0.3s all ease-in-out;
+}
+
+.page p {
+    font-size: 2rem;
+}
+
+.page .vid {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    z-index: -2;
+}
+
+.page .textbox {
+    background: rgba(255, 255, 255, .7);
+    border-radius: 4rem;
+    padding: 4rem;
+    border: 1px solid white;
+    box-shadow:
+    0 1px 1px hsl(0deg 0% 0% / 0.075),
+    0 2px 2px hsl(0deg 0% 0% / 0.075),
+    0 4px 4px hsl(0deg 0% 0% / 0.075),
+    0 8px 8px hsl(0deg 0% 0% / 0.075),
+    0 16px 16px hsl(0deg 0% 0% / 0.075)
+  ;
+}
+
+.visible {
+    top: 0;
+    left: 0;
+    transform: scale(1);
+    transition: 0.7s all ease-in-out;
+}
+
+#page1 {
+    background-color: lightskyblue;
+}
+
+#page2 {
+    background-color: lightgreen;
+}
+#page3 {
+    background-color: lightcyan;
+}
+#page4 {
+    background-color: lightseagreen;
+}
+#page5 {
+    background-color: lightgrey;
+}
+#page6 {
+    background-color: lightsalmon;
+}
+#page7 {
+    background-color: lightskyblue;
+}
+#page8 {
+    background-color: lightslategray;
+}
+#page9 {
+    background-color: lightgray;
+}
+#page10 {
+    background-color: hotpink;
+}
+#page11 {
+    background-color: black;
+    color: white;
+}
+
+h1 {
+    font-family: Raleway;
+    font-size: 12rem;
+    font-weight: 900;
+    color: hotpink;
+}
+
+#debug {
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    font-size: 3rem;
+}
+
+#activateButton {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    font-size: 3rem;
+}
