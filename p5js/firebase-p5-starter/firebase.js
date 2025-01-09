@@ -8,6 +8,7 @@ import { getFirestore, collection, getDocs, addDoc, setDoc, updateDoc, doc  } fr
 // Your web app's Firebase configuration
 const firebaseConfig = {
     //INDSÆT DIN KONFIGURATION HER
+    //ALTSÅ-
 };
 
 // Initialize Firebase
