@@ -36,6 +36,7 @@ function setup(){
 }
 
 function shiftPage(num){
+    select('#shadowbox').html('')
     if(num == "ArrowLeft"){
         num = currentPage - 1
     }
@@ -63,6 +64,13 @@ function shiftPage(num){
         }
     }
     c.addClass('visible')
+    setTimeout(()=>{
+        console.log("#page" + currentPage + ' .textbox')
+        select("#page" + currentPage + ' .textbox').addClass('fadeAway')
+        setTimeout(()=>{
+            select('#shadowbox').html('Vend terningen for at se flere sider af KMG')
+        }, 24000)
+    }, 10000)
 }
 
 function keyPressed(){
