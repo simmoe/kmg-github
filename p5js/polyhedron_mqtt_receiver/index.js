@@ -2,7 +2,7 @@ let currentPage = 1
 let pages //array med alle elementer med class = page 
 //dice er currentpage fra MQTT
 let dice = 0
-let diceActive = false
+let diceActive = true
 let debug = false 
 
 function setup(){
@@ -16,12 +16,15 @@ function setup(){
     select("#page" + currentPage).child(select('#shadowboxToo').elt)
 
     pages = selectAll('.page')
-    //nu kan man se at pages er blevet til en liste med alle class = page ting
-    console.log(pages.length)
 
     client = mqtt.connect('wss://mqtt.nextservices.dk');
     client.subscribe('polyhedron')
+
+    //start poly
+    client.publish('polyhedron_activate', 'activate')
     client.subscribe('polyhedron_debug')
+
+
   
     client.on('message', function (topic, message) {
         if(topic=="polyhedron"){
@@ -64,13 +67,6 @@ function shiftPage(num){
         }
     }
     c.addClass('visible')
-    setTimeout(()=>{
-        console.log("#page" + currentPage + ' .textbox')
-        select("#page" + currentPage + ' .textbox').addClass('fadeAway')
-        setTimeout(()=>{
-            select('#shadowbox').html('Vend terningen for at se flere sider af KMG')
-        }, 24000)
-    }, 10000)
 }
 
 function keyPressed(){
