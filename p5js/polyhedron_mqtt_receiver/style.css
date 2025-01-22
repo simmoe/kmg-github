@@ -90,11 +90,11 @@
     transition: 0.7s 0.3s all ease-in-out;
 }
 
-.page p {
+.page p, .page li {
     font-size: 3rem;
 }
 
-.page .vid {
+.page .vid , .page .photo{
     position: fixed;
     width: 100vw;
     height: 100vh;
