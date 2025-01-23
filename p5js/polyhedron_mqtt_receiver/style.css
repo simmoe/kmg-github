@@ -6,6 +6,10 @@
 .shadowbox, .shadowboxToo{
     width:40rem;
     height:40rem;
+    display:grid;
+    place-items:center;
+    color:whitesmoke;
+    font-size: 2em;
     background:rgba(255, 255, 255, .1);
     border-radius: 4rem;
     padding:4rem;
@@ -17,6 +21,12 @@
 }
 .shadowboxToo{
     animation: movemeToo infinite 14s;
+}
+
+.fadeAway{
+    transition: all 12s ease-in-out;
+    margin-left: -100vw;
+    margin-right: 100vw;
 }
 
 @keyframes moveme {
@@ -80,11 +90,11 @@
     transition: 0.7s 0.3s all ease-in-out;
 }
 
-.page p {
-    font-size: 2rem;
+.page p, .page li {
+    font-size: 3rem;
 }
 
-.page .vid {
+.page .vid , .page .photo{
     position: fixed;
     width: 100vw;
     height: 100vh;
@@ -95,7 +105,7 @@
 .page .textbox {
     background: rgba(255, 255, 255, .7);
     border-radius: 4rem;
-    padding: 4rem;
+    padding: 4rem 12rem;
     border: 1px solid white;
     box-shadow:
     0 1px 1px hsl(0deg 0% 0% / 0.075),
@@ -146,7 +156,6 @@
 }
 #page11 {
     background-color: black;
-    color: white;
 }
 
 h1 {
