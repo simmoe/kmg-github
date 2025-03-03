@@ -1,3 +1,17 @@
+# macOS metadata
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Ikon filer
+Icon?
+._*
+
+# Finder metadata
+.Spotlight-V100
+.Trashes
+
+
 # Logs
 logs
 *.log
