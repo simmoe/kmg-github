@@ -12,6 +12,26 @@ main{
     gap:2rem;
     overflow:scroll;
 }
+.reachable {
+    background: linear-gradient(45deg, rgba(255, 255, 150, 1) 0%, rgba(255, 255, 200, 1) 50%, rgba(255, 255, 255, 1) 100%);
+    background-size: 200% 200%;
+    animation: lightFade 12s infinite alternate ease-in-out;
+}
+
+@keyframes lightFade {
+    0% {
+        background-position: 0% 50%;
+        filter: brightness(1);
+    }
+    50% {
+        background-position: 100% 50%;
+        filter: brightness(1.2);
+    }
+    100% {
+        background-position: 0% 50%;
+        filter: brightness(1);
+    }
+}
 
 .controls{
     display:grid;

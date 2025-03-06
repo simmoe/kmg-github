@@ -4,7 +4,7 @@ let currentPage = '#side-1'
 //10.78.65.185/api/kgMgko5iDYljmA3ERym5GDibEkDzQTxutUSDqN36/groups
 
 var ip = '10.78.16.62' // the hub IP address
-var username = 'kgMgko5iDYljmA3ERym5GDibEkDzQTxutUSDqN36'       // fill in your Hub-given username here
+var username = '6MXQnVOMUBwAuqXnedzRZ4cvhaI9MCLgSjYOrjdx'       // fill in your Hub-given username here
 var usernameField, addressField, connectButton
 let url, groupUrl
 
@@ -40,19 +40,53 @@ to create a new div for the UI elements
 */
 
 function getLights(result) {
-  //console.log(JSON.parse(result))
   select('main').html('')
-  var lights = JSON.parse(result)		          // parse the HTTP response
-  for (thisLight in lights) {			            // iterate over each light in the response
-    var controlDiv = createElement('div').addClass('light')		// create a div
-    controlDiv.id(thisLight)				          // name it
-    controlArray.push(controlDiv);            // add it to array of light controls
-    controlDiv.child(createElement('h2', lights[thisLight].name))	// add title to the light's div
+  var lightsUnsorted = JSON.parse(result) // Parse HTTP response
+
+  // Konverter objekt til array for sortering
+  let lightsArray = Object.entries(lightsUnsorted)
+
+  console.log("Array before sorting:", lightsArray.map(l => l[1].name)) // Log navne før sortering
+
+  lightsArray.sort((a, b) => {
+    const extractNumber = name => {
+      const match = name.match(/\d+/) // Finder første tal i navnet
+      return match ? parseInt(match[0], 10) : Infinity // Hvis ingen tal, læg den sidst
+    }
+
+    const nameA = a[1].name.toLowerCase()
+    const nameB = b[1].name.toLowerCase()
+
+    const isLampA = nameA.includes("color lamp")
+    const isLampB = nameB.includes("color lamp")
+
+    // Sikrer, at "color lamp" altid kommer før "smart plug"
+    if (isLampA && !isLampB) return -1
+    if (!isLampA && isLampB) return 1
+
+    // Hvis begge er samme type, sorter numerisk
+    const numA = extractNumber(nameA)
+    const numB = extractNumber(nameB)
+
+    return numA - numB
+  })
+
+  // Behold rækkefølgen i et array i stedet for et objekt
+  let sortedLights = lightsArray.map(([key, value]) => ({ key, ...value }))
+
+  // Loop gennem arrayet i stedet for et objekt
+  sortedLights.forEach(light => {
+    var controlDiv = createElement('div').addClass('light') // create a div
+    controlDiv.id(light.key) // name it
+    controlArray.push(controlDiv) // add it to array of light controls
+    controlDiv.child(createElement('h2', light.name)) // add title to the light's div
     // create the controls inside it:
-    createControl(lights[thisLight], controlDiv)
+    createControl(light, controlDiv)
     select('main').child(controlDiv)
-  }
+  })
 }
+
+
 
 function getGroups(result) {
   let groups = JSON.parse(result)
@@ -133,7 +167,7 @@ function createControl(thisLight, thisDiv) {
         myInput = createSpan(state.colormode);	// a label for colormode
         break;
       case 'reachable':
-        myInput = createSpan(state.reachable);	// a label for reachable
+        myInput = createSpan(state.reachable).addClass("reachable" + state.reachable)	// a label for reachable
         break        
     }
 
@@ -141,6 +175,7 @@ function createControl(thisLight, thisDiv) {
     // above, so this conditional filters for those:
     if (myInput != null) {
       myLabel = createDiv().addClass('property')  // create a label span
+      myInput.elt.classList.contains('reachabletrue') && thisDiv.addClass('reachable')
       myInput.id(property)                        // give the input an id
       myLabel.html(property) 
       thisDiv.child(myLabel);		                  // add the label to the light's div
