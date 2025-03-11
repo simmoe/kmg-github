@@ -17,11 +17,14 @@ json_object = None
 apikey = None
 hue_username = None
 onBoolean = None
-night_lights = [8, 9, 10, 11, 12, 13, 14]  # Lys der skal slukkes om natten
+night_lights = [8, 9, 10, 11, 12, 13, 14]  # Lys, der skal slukkes om natten
 
 # Globale tidspunkter for nattilstand (24-timers format)
-NIGHT_START = 23  # Nat starter kl. 23:00
+NIGHT_START = 16  # Nat starter kl. 23:00
 NIGHT_END = 7     # Nat slutter kl. 07:00
+
+# MQTT-topic for skiltet
+MQTT_SIGN_TOPIC = 'DDU_INFINITY'
 
 # Opret labels
 Hue_status = M5Label('label0', x=182, y=33, color=0x000, font=FONT_MONT_14, parent=None)
@@ -64,7 +67,11 @@ def fun_HUE_CONTROLLER_COMMAND_(topic_data):
         m5mqtt.publish('HUE_CONTROLLER_STATUS', str(e), 0)
 
 def check_night_mode():
-    """Slukker for alle lys i night_lights, hvis klokken er mellem NIGHT_START og NIGHT_END."""
+    """
+    Slukker for alle lys i night_lights og opdaterer skiltet via MQTT.
+    Hvis den aktuelle time er ≥ NIGHT_START eller < NIGHT_END, publiceres 'off' på MQTT_SIGN_TOPIC.
+    Ellers sendes 'on'.
+    """
     try:
         current_hour = ntp.hour()  # Forudsætter, at ntp er initialiseret
         if current_hour >= NIGHT_START or current_hour < NIGHT_END:
@@ -72,8 +79,13 @@ def check_night_mode():
                 url = 'http://10.78.16.62/api/' + hue_username + '/lights/' + str(light_id) + '/state'
                 req = urequests.put(url, json={'on': False})
                 req.close()
+            m5mqtt.publish(MQTT_SIGN_TOPIC, 'off', 0)
+            timeLabel.set_text(ntp.formatTime(':'))
+            Hue_status.set_text('Ok')
+        else:
+            m5mqtt.publish(MQTT_SIGN_TOPIC, 'on', 0)
     except Exception as e:
-        print("Error in check_night_mode:", e)
+        Hue_status.set_text("Error in check_night_mode:", e)
 
 @timerSch.event('ntpTimer')
 def tntpTimer():
