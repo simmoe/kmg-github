@@ -6,6 +6,7 @@ from m5mqtt import M5mqtt
 from easyIO import *
 import unit
 import math
+import time
 
 setScreenColor(0x111111)
 neopixel_1 = unit.get(unit.NEOPIXEL, unit.PORTA, 49)
@@ -23,7 +24,6 @@ sekunder = None
 
 label0 = M5TextBox(16, 97, "INFINITY", lcd.FONT_DejaVu24, 0xFFFFFF, rotate=0)
 
-# Custom round: runder .5 væk fra 0 (så -24.5 → -25)
 def custom_round(x):
     if x >= 0:
         return int(x + 0.5)
@@ -43,28 +43,55 @@ def hour_to_led(hour):
     led = ((led - 1) % 49) + 1
     return led
 
+def compute_fade_color():
+    period = 1000  # Fuld fade-cyklus på 1 sekund
+    t = time.ticks_ms() % period
+    phase = t / period  # Værdi mellem 0.0 og 1.0
+    if phase < 0.5:
+        fraction = phase * 2    # Fade ind: 0 → 1
+    else:
+        fraction = (1 - phase) * 2  # Fade ud: 1 → 0
+    # Definer farver: mørk blå og lyseblå
+    dark_blue = 0x000066
+    light_blue = 0x66ffff
+    r_dark = (dark_blue >> 16) & 0xFF
+    g_dark = (dark_blue >> 8) & 0xFF
+    b_dark = dark_blue & 0xFF
+    r_light = (light_blue >> 16) & 0xFF
+    g_light = (light_blue >> 8) & 0xFF
+    b_light = light_blue & 0xFF
+    # Interpolér farvekomponenterne
+    r = int(r_dark + (r_light - r_dark) * fraction)
+    g = int(g_dark + (g_light - g_dark) * fraction)
+    b = int(b_dark + (b_light - b_dark) * fraction)
+    return (r << 16) | (g << 8) | b
+
 @timerSch.event('ecoTimer')
 def tecoTimer():
-  global my_12_hour, apikey, LED_DIV, hue_username, offset, middle_thing, hour_led, minute, sekunder
-  # Beregn time-LED ud fra ntp.hour()
-  hour_led = hour_to_led(ntp.hour())
+    global hour_led, minute, sekunder, ntp
+    # Beregn time-LED ud fra ntp.hour()
+    hour_led = hour_to_led(ntp.hour())
   
-  # Mapping for minutter og sekunder (eksisterende kode)
-  minute = (28 - (map_value((ntp.minute()), 0, 59, 1, 49))) % 49
-  sekunder = (28 - (map_value((ntp.second()), 0, 59, 1, 49))) % 49
+    # Mapping for minutter og sekunder
+    minute = (28 - (map_value(ntp.minute(), 0, 59, 1, 49))) % 49
+    sekunder = (28 - (map_value(ntp.second(), 0, 59, 1, 49))) % 49
   
-  # Sæt farver for de forskellige tids-enheder
-  neopixel_1.setColor((sekunder - 1), 0x66ffff)
-  neopixel_1.setColor(hour_led, 0xffff00)      # Timer: gul
-  neopixel_1.setColor(minute, 0x33ff33)          # Minutter: grøn
-  neopixel_1.setColor(sekunder, 0x000066)         # Sekunder: mørk blå
-  pass
+    # Sæt farver for time og minut (sekund LED opdateres separat)
+    neopixel_1.setColor(hour_led, 0xffffff)   # Timer: gul
+    neopixel_1.setColor(minute, 0x33ff33)       # Minutter: grøn
 
 @timerSch.event('ntpTimer')
 def tntpTimer():
-  global my_12_hour, apikey, LED_DIV, hue_username, offset, middle_thing, hour_led, minute, sekunder
-  ntp = ntptime.client(host='dk.pool.ntp.org', timezone=1)
-  pass
+    global ntp
+    ntp = ntptime.client(host='dk.pool.ntp.org', timezone=1)
+
+@timerSch.event('fadeTimer')
+def fadeTimer():
+    global sekunder, hour_led, minute
+    # Opdater kun sekund LED'en, hvis den ikke overlapper med time eller minut
+    if sekunder != hour_led and sekunder != minute:
+        neopixel_1.setColor(sekunder, compute_fade_color())
+    # Hvis sekunder overlapper med time/minut, bevares den eksisterende farve
 
 apikey = '584E331D'
 hue_username = '6MXQnVOMUBwAuqXnedzRZ4cvhaI9MCLgSjYOrjdx'
@@ -73,7 +100,10 @@ m5mqtt.start()
 m5mqtt.publish(str('KMG CONTROLLER STARTUP'), str('Start'), 0)
 neopixel_1.setBrightness(100)
 ntp = ntptime.client(host='dk.pool.ntp.org', timezone=1)
+
 timerSch.run('ntpTimer', 360000, 0x00)
 timerSch.run('ecoTimer', 1000, 0x00)
+timerSch.run('fadeTimer', 50, 0x00)
+
 while True:
-  wait_ms(2)
+    wait_ms(2)
