@@ -19,6 +19,7 @@ minute_led = None
 last_minute = -1
 minute_fade_start = None
 fade_duration = 3000  # Fade varighed i ms (3 sekunder)
+FADE_INTERVAL = 10  # Opdateringsinterval for fadeTimer i ms – kan ændres for test
 
 label0 = M5TextBox(16, 97, "INFINITY", lcd.FONT_DejaVu24, 0xFFFFFF, rotate=0)
 
@@ -44,6 +45,14 @@ def minute_to_led(minute):
     led = 24 - offset
     led = ((led - 1) % 49) + 1
     return led
+
+def smoothstep(x):
+    # Smoothstep interpolation: x bør være i intervallet [0, 1]
+    if x < 0:
+        x = 0
+    elif x > 1:
+        x = 1
+    return x * x * (3 - 2 * x)
 
 @timerSch.event('ecoTimer')
 def tecoTimer():
@@ -85,11 +94,10 @@ def fadeTimer():
                 elapsed = time.ticks_diff(time.ticks_ms(), minute_fade_start)
                 if elapsed < fade_duration:
                     phase = elapsed / fade_duration
-                    # Fade ud og herefter ind: 1 -> 0 -> 1 over 3 sekunder
                     if phase < 0.5:
-                        factor = 1.0 - (phase * 2)  # fra 1 til 0
+                        factor = 1.0 - (phase * 2)
                     else:
-                        factor = (phase - 0.5) * 2   # fra 0 til 1
+                        factor = (phase - 0.5) * 2
                 else:
                     minute_fade_start = None
             r = int(0xFF * factor)
@@ -98,12 +106,13 @@ def fadeTimer():
             minute_color = (r << 16) | (g << 8) | b
             neopixel_1.setColor(led, minute_color)
         elif led == hour_led:
-            # Time-LED forbliver hvid (sat af ecoTimer)
+            # Time-LED forbliver hvid, sat af ecoTimer
             continue
         else:
-            # Sekund-snake effekt med lineær fade
+            # Sekund-snake: brug smoothstep til et glattere fade
             if d < snake_length:
-                factor = 1.0 - (d / snake_length)
+                t = d / snake_length
+                factor = 1.0 - smoothstep(t)
                 r = int(((base_color >> 16) & 0xFF) * factor)
                 g = int(((base_color >> 8) & 0xFF) * factor)
                 b = int((base_color & 0xFF) * factor)
@@ -122,7 +131,7 @@ ntp = ntptime.client(host='dk.pool.ntp.org', timezone=1)
 
 timerSch.run('ntpTimer', 360000, 0x00)
 timerSch.run('ecoTimer', 1000, 0x00)
-timerSch.run('fadeTimer', 50, 0x00)
+timerSch.run('fadeTimer', FADE_INTERVAL, 0x00)
 
 while True:
     wait_ms(2)
