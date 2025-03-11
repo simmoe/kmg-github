@@ -46,7 +46,7 @@ function getLights(result) {
   // Konverter objekt til array for sortering
   let lightsArray = Object.entries(lightsUnsorted)
 
-  console.log("Array before sorting:", lightsArray.map(l => l[1].name)) // Log navne før sortering
+  //console.log("Array before sorting:", lightsArray.map(l => l[1].name)) // Log navne før sortering
 
   lightsArray.sort((a, b) => {
     const extractNumber = name => {
@@ -90,7 +90,7 @@ function getLights(result) {
 
 function getGroups(result) {
   let groups = JSON.parse(result)
-  console.log(groups)
+  //console.log(groups)
 
   for( groupId in groups) {
     let group = groups[groupId]
@@ -138,9 +138,14 @@ this function creates UI controls from the lights data
 returned by the hub
 */
 function createControl(thisLight, thisDiv) {
+  console.log(thisLight, 'Et lys')
   var state = thisLight.state 	// state of this light
   var myLabel                   // each control will get a label
   var myInput                   // and input
+
+  myLabel = createDiv().addClass('property')  // create a label span
+  myLabel.html('API Nummer: ' + thisLight.key)
+  thisDiv.child(myLabel);		                  // add the label to the light's div
 
   for (property in state) {     // iterate over  properties in state object
     myInput = null              // clear myInput from previous control
