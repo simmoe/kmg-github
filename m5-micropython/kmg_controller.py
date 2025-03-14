@@ -1,128 +1,219 @@
 from m5stack import *
 from m5stack_ui import *
 from uiflow import *
-import urequests
-import ntptime
-import json
-import time
+import urequests, ntptime, json, time
 from libs.json_py import *
 from m5mqtt import M5mqtt
 
-# Skærmopsætning
+# Screen setup
 screen = M5Screen()
 screen.clean_screen()
 screen.set_screen_bg_color(0xFFFFFF)
 
-# Globale variabler
-json_object = None
-apikey = None
-hue_username = None
-onBoolean = None
+# Global configuration
+apikey = '2F3158FF'
+hue_username = '6MXQnVOMUBwAuqXnedzRZ4cvhaI9MCLgSjYOrjdx'
 
-# Lys der skal slukkes om natten
-night_lights = [8, 9, 10, 11, 12, 13, 14]
-# Lys der skal tændes automatisk om dagen
+# night_lights: Array af objekter med lys-ID og den aktuelle "on"-status.
+night_lights = [
+    {"id": 8, "on": None},
+    {"id": 9, "on": None},
+    {"id": 10, "on": None},
+    {"id": 11, "on": None},
+    {"id": 12, "on": None},
+    {"id": 13, "on": None},
+    {"id": 14, "on": None},
+]
+# day_lights: Liste af lys-ID'er, som skal tændes i dag (skal være blandt night_lights)
 day_lights = [9]
 
-# Globale tidspunkter for nattilstand (24-timers format)
-NIGHT_START = 16  # Nat starter kl. 16:00
-NIGHT_END = 7     # Nat slutter kl. 07:00
-
-# Global variabel for midlertidig udsættelse af night_mode (override)
+# Night mode settings
+NIGHT_START = 16  # 24-timers format
+NIGHT_END = 7
 night_mode_suspend_until = 0
 
-# MQTT-topic for skiltet
 MQTT_SIGN_TOPIC = 'DDU_INFINITY'
 
 # Opret labels
 Hue_status = M5Label('label0', x=182, y=33, color=0x000, font=FONT_MONT_14, parent=None)
 hue_label = M5Label('Hue status test:', x=30, y=33, color=0x000, font=FONT_MONT_14, parent=None)
 timeLabel = M5Label('Test time', x=30, y=53, color=0x000, font=FONT_MONT_14, parent=None)
-nightModeLabel = M5Label('Opdaterer night mode status...', x=30, y=73, color=0x000, font=FONT_MONT_14, parent=None)
+nightModeLabel = M5Label('Updating night mode status...', x=30, y=73, color=0x000, font=FONT_MONT_14, parent=None)
+updateLabel = M5Label('System started...', x=30, y=93, color=0x000, font=FONT_MONT_14, parent=None)
 
-def testHUE():
-    """Tester forbindelsen til Hue-lyset (nummer 14) og opdaterer timeLabel med den aktuelle tid."""
-    global ntp
-    timeLabel.set_text(ntp.formatTime(':'))
+# Opret et dictionary til at holde checkbox references
+checkboxes = {}
+# Placer checkboxes i et grid med fire per række
+start_x = 10
+start_y = 120
+offset_x = 80
+offset_y = 30
+for i, light in enumerate(night_lights):
+    col = i % 4
+    row = i // 4
+    x = start_x + col * offset_x
+    y = start_y + row * offset_y
+    cb = M5Checkbox(text = str(light["id"]),
+                    x=x,
+                    y=y,
+                    text_c=0x000,
+                    check_c=0x000,
+                    font=FONT_MONT_18,
+                    parent=None)
+    checkboxes[light["id"]] = cb
+
+def log_update(msg):
+    """Opdaterer updateLabel med en kort besked."""
+    updateLabel.set_text(msg)
+
+def hue_request(method, path, json_data=None):
+    """Central funktion til HTTP-kald til Hue API'et."""
+    url = 'http://10.78.16.62/api/' + hue_username + '/' + path
     try:
-        url = 'http://10.78.16.62/api/' + hue_username + '/lights/14'
-        req = urequests.get(url)
-        Hue_status.set_text('Ok')
+        if method == 'GET':
+            req = urequests.get(url)
+        elif method == 'PUT':
+            req = urequests.put(url, json=json_data)
+        else:
+            return None
+        result = req.text
         req.close()
+        return result
     except Exception as e:
-        Hue_status.set_text(str(e))
+        log_update("Hue request error: " + str(e))
+        return None
+
+def update_night_lights_state():
+    """Opdaterer status for hvert lys i night_lights via et GET-kald til /lights."""
+    res = hue_request('GET', 'lights')
+    if res:
+        try:
+            lights = json.loads(res)
+            for light in night_lights:
+                lid_str = str(light["id"])
+                if lid_str in lights:
+                    light["on"] = lights[lid_str]["state"]["on"]
+            log_update("night_lights updated")
+            display_lights_status()
+        except Exception as e:
+            log_update("Error parsing lights: " + str(e))
+
+
+def update_night_light_state(light_id, new_state):
+    """Opdaterer tilstanden for et specifikt lys i night_lights."""
+    for light in night_lights:
+        if light["id"] == light_id:
+            light["on"] = new_state
+            break
+    display_lights_status()
+
+def display_lights_status():
+    """
+    Opdaterer checkboxene for hvert lys i night_lights.
+    Hvis lys["on"] er True, sættes checkboksen til checked, ellers unchecked.
+    """
+    for light in night_lights:
+        cb = checkboxes.get(light["id"])
+        if cb:
+            cb.set_checked(light["on"])
 
 def fun_HUE_CONTROLLER_STATUS_REQUEST_(topic_data):
-    """Henter status for alle Hue-lys og publicerer resultatet til MQTT."""
-    try:
-        url = 'http://10.78.16.62/api/' + hue_username + '/lights'
-        req = urequests.get(url)
-        m5mqtt.publish('HUE_CONTROLLER/status', req.text, 0)
-        req.close()
-    except Exception as e:
-        m5mqtt.publish('HUE_CONTROLLER/status', str(e), 0)
+    res = hue_request('GET', 'lights')
+    if res:
+        m5mqtt.publish('HUE_CONTROLLER/status', res, 0)
+        update_night_lights_state()
+        log_update("Status request executed")
+    else:
+        m5mqtt.publish('HUE_CONTROLLER/status', "Error", 0)
 
 def fun_HUE_CONTROLLER_COMMAND_(topic_data):
-    """Modtager en kommando (i JSON-format) for et bestemt lys og sender en PUT-request til Hue API'et."""
-    json_object = json.loads(topic_data)
-    onBoolean = True if get_json_key(json_object, 'on') else False
-    light_id = get_json_key(json_object, 'light')
-    url = 'http://10.78.16.62/api/' + hue_username + '/lights/' + str(light_id) + '/state'
     try:
-        req = urequests.put(url, json={'on': onBoolean}, headers={'bri': str(light_id)})
-        m5mqtt.publish('HUE_CONTROLLER/status', req.text, 0)
-        req.close()
+        cmd = json.loads(topic_data)
+        on_val = True if get_json_key(cmd, 'on') else False
+        light_id = int(get_json_key(cmd, 'light'))
+        res = hue_request('PUT', 'lights/' + str(light_id) + '/state', {'on': on_val})
+        if res is not None:
+            m5mqtt.publish('HUE_CONTROLLER/status', res, 0)
+            update_night_light_state(light_id, on_val)
+            log_update("Light " + str(light_id) + " set to " + ("on" if on_val else "off"))
+        else:
+            m5mqtt.publish('HUE_CONTROLLER/status', "Error", 0)
     except Exception as e:
         m5mqtt.publish('HUE_CONTROLLER/status', str(e), 0)
+        log_update("Error in COMMAND: " + str(e))
 
 def fun_NIGHT_MODE_OVERRIDE_(topic_data):
-    """
-    Udsætter night_mode i 6 timer.
-    Denne funktion kaldes over MQTT på topic 'NIGHT_MODE_OVERRIDE'.
-    """
     global night_mode_suspend_until
-    # Sæt override til 6 timer fra nu
     night_mode_suspend_until = time.time() + 6 * 3600
     m5mqtt.publish(MQTT_SIGN_TOPIC, 'on', 0)
-    nightModeLabel.set_text("Night mode override aktiv - nattilstand deaktiveret")
+    nightModeLabel.set_text("Night mode override active - disabled")
+    log_update("Night mode override activated")
 
 def check_night_mode():
-    """
-    Håndterer night mode:
-      - Hvis override er aktiv, publiceres 'on' og label opdateres.
-      - Hvis den aktuelle time er ≥ NIGHT_START eller < NIGHT_END (nattilstand):
-            slukkes alle lys i night_lights, og 'off' publiceres på MQTT_SIGN_TOPIC.
-      - Ellers (dagtilstand):
-            tændes alle lys i day_lights, og 'on' publiceres på MQTT_SIGN_TOPIC.
-    """
     try:
-        # Tjek for override
         if time.time() < night_mode_suspend_until:
             m5mqtt.publish(MQTT_SIGN_TOPIC, 'on', 0)
-            nightModeLabel.set_text("Night mode override aktiv - nattilstand deaktiveret")
+            nightModeLabel.set_text("Night mode override active")
+            log_update("Night mode override active")
             return
 
-        current_hour = ntp.hour()  # Forudsætter, at ntp er initialiseret
+        current_hour = ntp.hour()
         if current_hour >= NIGHT_START or current_hour < NIGHT_END:
-            # Night mode: Sluk alle lys i night_lights
-            for light_id in night_lights:
-                url = 'http://10.78.16.62/api/' + hue_username + '/lights/' + str(light_id) + '/state'
-                req = urequests.put(url, json={'on': False})
-                req.close()
+            # Night mode: Sluk hvert lys i night_lights
+            for light in night_lights:
+                hue_request('PUT', 'lights/' + str(light["id"]) + '/state', {'on': False})
+                light["on"] = False
             m5mqtt.publish(MQTT_SIGN_TOPIC, 'off', 0)
-            nightModeLabel.set_text("Night mode aktiv")
+            nightModeLabel.set_text("Night mode active")
             timeLabel.set_text(ntp.formatTime(':'))
             Hue_status.set_text('Ok')
+            log_update("Night mode: lights turned off")
+            display_lights_status()
         else:
-            # Day mode: Tænd alle lys i day_lights
-            for light_id in day_lights:
-                url = 'http://10.78.16.62/api/' + hue_username + '/lights/' + str(light_id) + '/state'
-                req = urequests.put(url, json={'on': True})
-                req.close()
+            # Day mode: Tænd de lys i day_lights (som findes i night_lights)
+            for lid in day_lights:
+                hue_request('PUT', 'lights/' + str(lid) + '/state', {'on': True})
+                update_night_light_state(lid, True)
             m5mqtt.publish(MQTT_SIGN_TOPIC, 'on', 0)
-            nightModeLabel.set_text("Day mode aktiv")
+            nightModeLabel.set_text("Day mode active")
+            log_update("Day mode: lights turned on")
+            display_lights_status()
     except Exception as e:
         Hue_status.set_text("Error in check_night_mode: " + str(e))
+        log_update("Error in night mode: " + str(e))
+
+def fun_DDU_TIME(topic_data):
+    """
+    Modtager et tidspunkt (fx "14:00"), beregner blinketallet (i 12-timers format),
+    benytter gruppe 81's endpoint til at blinke, og gendanner derefter lysenes oprindelige tilstand
+    baseret på data i night_lights.
+    """
+    try:
+        # Brug den interne tilstand i night_lights (ingen ekstra opdatering)
+        orig_states = {light["id"]: light["on"] for light in night_lights}
+        
+        time_str = topic_data.strip()  # fx "14:00"
+        hour_int = int(time_str.split(':')[0])
+        blink_count = hour_int % 12
+        if blink_count == 0:
+            blink_count = 12
+        
+        log_update("Blinking group 81 " + str(blink_count) + " times")
+        group_endpoint = 'groups/81/action'
+        for i in range(blink_count):
+            hue_request('PUT', group_endpoint, {'on': True})
+            time.sleep(1)
+            hue_request('PUT', group_endpoint, {'on': False})
+            time.sleep(1)
+        
+        # Gendan lysenes tilstand baseret på den oprindelige værdi
+        for light in night_lights:
+            hue_request('PUT', 'lights/' + str(light["id"]) + '/state', {'on': orig_states[light["id"]]})
+            light["on"] = orig_states[light["id"]]
+        log_update("Blinking complete, states restored")
+        display_lights_status()
+    except Exception as e:
+        log_update("Error in DDU_TIME: " + str(e))
 
 @timerSch.event('ntpTimer')
 def tntpTimer():
@@ -130,19 +221,15 @@ def tntpTimer():
     ntp = ntptime.client(host='dk.pool.ntp.org', timezone=1)
     check_night_mode()
 
-# Initialisering af API-nøgle, Hue-brugernavn og MQTT
-apikey = '2F3158FF'
-hue_username = '6MXQnVOMUBwAuqXnedzRZ4cvhaI9MCLgSjYOrjdx'
+# MQTT initialization
 m5mqtt = M5mqtt('', 'mqtt.nextservices.dk', 0, '', '', 300, ssl=True)
 m5mqtt.subscribe('HUE_CONTROLLER_STATUS_REQUEST', fun_HUE_CONTROLLER_STATUS_REQUEST_)
 m5mqtt.subscribe('HUE_CONTROLLER_COMMAND', fun_HUE_CONTROLLER_COMMAND_)
 m5mqtt.subscribe('NIGHT_MODE_OVERRIDE', fun_NIGHT_MODE_OVERRIDE_)
+m5mqtt.subscribe('DDU_TIME', fun_DDU_TIME)
 m5mqtt.start()
 m5mqtt.publish('KMG CONTROLLER STARTUP', 'Start', 0)
 
 ntp = ntptime.client(host='dk.pool.ntp.org', timezone=1)
-# Kør check_night_mode() med det samme for at opdatere status
 check_night_mode()
-timerSch.run('ntpTimer', 360000, 0x00)
-
-testHUE()
+timerSch.run('ntpTimer', 360000, 0)
