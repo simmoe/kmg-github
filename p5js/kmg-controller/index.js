@@ -83,13 +83,37 @@ function setup() {
 
         if (topic === 'HUE_CONTROLLER/status') {
             let ms = JSON.parse(msg);
-            Object.entries(ms).forEach(([lightNumber, lightData]) => {
+            
+            if (Array.isArray(ms)) {
+              // Håndterer besked med enkelt lys (array med success-objekt)
+              ms.forEach(item => {
+                if (item.success) {
+                  Object.entries(item.success).forEach(([key, value]) => {
+                    // Ekstrakt lightNumber fra "/lights/14/state/on"
+                    let match = key.match(/\/lights\/(\d+)\/state\/on/);
+                    if (match) {
+                      let lightNumber = match[1];
+                      let on = value;  // Her antager vi, at checked er true/false
+                      let button = select(`.control_button[data-lightnumber="${lightNumber}"]`);
+                      if (button) {
+                        // Vi har ikke brightness i denne besked – sæt evt. til null eller en default-værdi
+                        updateHueButton(lightNumber, on, null);
+                      }
+                    }
+                  });
+                }
+              });
+            } else if (typeof ms === 'object') {
+              // Håndterer besked med flere lys
+              Object.entries(ms).forEach(([lightNumber, lightData]) => {
+                console.log('receives here', lightNumber);
                 let button = select(`.control_button[data-lightnumber="${lightNumber}"]`);
                 if (button) {
-                    updateHueButton(lightNumber, lightData.state.on, lightData.state.bri);
+                  updateHueButton(lightNumber, lightData.state.on, lightData.state.bri);
                 }
-            });
-        }
+              });
+            }
+          }
     });
 
     // Find alle Hue-knapper og tilføj event listeners

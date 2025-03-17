@@ -35,14 +35,13 @@ night_mode_suspend_until = 0
 MQTT_SIGN_TOPIC = 'DDU_INFINITY'
 
 # Opret labels
-Hue_status = M5Label('label0', x=182, y=33, color=0x000, font=FONT_MONT_14, parent=None)
-hue_label = M5Label('Hue status test:', x=30, y=33, color=0x000, font=FONT_MONT_14, parent=None)
 timeLabel = M5Label('Test time', x=30, y=53, color=0x000, font=FONT_MONT_14, parent=None)
 nightModeLabel = M5Label('Updating night mode status...', x=30, y=73, color=0x000, font=FONT_MONT_14, parent=None)
 updateLabel = M5Label('System started...', x=30, y=93, color=0x000, font=FONT_MONT_14, parent=None)
 
 # Opret et dictionary til at holde checkbox references
 checkboxes = {}
+
 # Placer checkboxes i et grid med fire per række
 start_x = 10
 start_y = 120
@@ -53,14 +52,34 @@ for i, light in enumerate(night_lights):
     row = i // 4
     x = start_x + col * offset_x
     y = start_y + row * offset_y
-    cb = M5Checkbox(text = str(light["id"]),
+    cb = M5Checkbox(text = 'B: ' + str(light["id"]),
                     x=x,
                     y=y,
                     text_c=0x000,
                     check_c=0x000,
                     font=FONT_MONT_18,
                     parent=None)
+
+
+    cb.my_id = light["id"]  # Gem light number
     checkboxes[light["id"]] = cb
+
+    # Callback for når checkboxen bliver sat til checked (antager on=True)
+    def on_checkbox_checked(cb=cb):
+        cmd = json.dumps({"light": cb.my_id, "on": True})
+        log_update("Checkbox " + str(cb.my_id) + " changed to on")
+        m5mqtt.publish('DEBUG/HUE_CONTROLLER_COMMAND', cmd, 0)
+        fun_HUE_CONTROLLER_COMMAND_(cmd)
+
+    # Callback for når checkboxen bliver sat til unchecked (antager on=False)
+    def on_checkbox_unchecked(cb=cb):
+        cmd = json.dumps({"light": cb.my_id, "on": False})
+        log_update("Checkbox " + str(cb.my_id) + " changed to off")
+        m5mqtt.publish('DEBUG/HUE_CONTROLLER_COMMAND', cmd, 0)
+        fun_HUE_CONTROLLER_COMMAND_(cmd)
+
+    cb.checked(on_checkbox_checked)
+    cb.unchecked(on_checkbox_unchecked)
 
 def log_update(msg):
     """Opdaterer updateLabel med en kort besked."""
@@ -128,6 +147,7 @@ def fun_HUE_CONTROLLER_STATUS_REQUEST_(topic_data):
 
 def fun_HUE_CONTROLLER_COMMAND_(topic_data):
     try:
+        log_update("Received command: " + topic_data)
         cmd = json.loads(topic_data)
         on_val = True if get_json_key(cmd, 'on') else False
         light_id = int(get_json_key(cmd, 'light'))
