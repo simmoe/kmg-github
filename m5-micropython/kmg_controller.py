@@ -186,7 +186,6 @@ def check_night_mode():
             m5mqtt.publish(MQTT_SIGN_TOPIC, 'off', 0)
             nightModeLabel.set_text("Night mode active")
             timeLabel.set_text(ntp.formatTime(':'))
-            Hue_status.set_text('Ok')
             log_update("Night mode: lights turned off")
             display_lights_status()
         else:
@@ -199,7 +198,6 @@ def check_night_mode():
             log_update("Day mode: lights turned on")
             display_lights_status()
     except Exception as e:
-        Hue_status.set_text("Error in check_night_mode: " + str(e))
         log_update("Error in night mode: " + str(e))
 
 def fun_DDU_TIME(topic_data):
