@@ -180,6 +180,10 @@ def fun_HUE_CONTROLLER_COMMAND_(topic_data):
             m5mqtt.publish('HUE_CONTROLLER/status', res, 0)
             update_night_light_state(light_id, on_val)
             log_update("Light " + str(light_id) + " set to " + ("on" if on_val else "off"))
+            # Update the relevant checkbox
+            cb = checkboxes.get(light_id)
+            if cb:
+                cb.set_checked(on_val)
         else:
             m5mqtt.publish('HUE_CONTROLLER/status', "Error", 0)
     except Exception as e:
