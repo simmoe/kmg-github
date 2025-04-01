@@ -55,7 +55,7 @@ function setup() {
 
     client.on('message', (topic, message) => {
         let msg = message.toString();
-        console.log(`Received on ${topic}:`, msg);
+        console.log(`Received on ${topic}`);
 
         if (topic === 'DDU_INFINITY') {
             // Hvis beskeden er "off", betyder det at nattilstand er aktiv (override ikke sat)
@@ -106,7 +106,7 @@ function setup() {
             } else if (typeof ms === 'object') {
               // Håndterer besked med flere lys
               Object.entries(ms).forEach(([lightNumber, lightData]) => {
-                console.log('receives here', lightNumber);
+                //console.log('receives here', lightNumber);
                 let button = select(`.control_button[data-lightnumber="${lightNumber}"]`);
                 if (button) {
                   updateHueButton(lightNumber, lightData.state.on, lightData.state.bri);

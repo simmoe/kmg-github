@@ -136,14 +136,38 @@ def display_lights_status():
         if cb:
             cb.set_checked(light["on"])
 
+
+def update_night_lights_state_from_json(res):
+    log_update("Updating lights from res")
+    try:
+        lights = json.loads(res)
+        for light in night_lights:
+            lid_str = str(light["id"])
+            if lid_str in lights:
+                light["on"] = lights[lid_str]["state"]["on"]
+        log_update("night_lights updated")
+        display_lights_status()
+    except Exception as e:
+        log_update("Error parsing lights: " + str(e))
+
+def fun_UPDATE_LIGHTS(topic_data):
+    update_night_lights_state_from_json(topic_data)
+
+
 def fun_HUE_CONTROLLER_STATUS_REQUEST_(topic_data):
+    """
+    Handles status requests by fetching the current light states from the Hue API
+    and publishing the result to the MQTT topic.
+    """
     res = hue_request('GET', 'lights')
     if res:
+        log_update("Status request begun")
         m5mqtt.publish('HUE_CONTROLLER/status', res, 0)
-        update_night_lights_state()
+        # Removed redundant update of night lights
         log_update("Status request executed")
     else:
         m5mqtt.publish('HUE_CONTROLLER/status', "Error", 0)
+
 
 def fun_HUE_CONTROLLER_COMMAND_(topic_data):
     try:
@@ -233,10 +257,31 @@ def fun_DDU_TIME(topic_data):
     except Exception as e:
         log_update("Error in DDU_TIME: " + str(e))
 
+# Add a global variable to track the last time the NTP server was checked
+last_ntp_check = 0
+NTP_CHECK_INTERVAL = 3600  # Check NTP server every hour (in seconds)
+
+def check_ntp_connection():
+    """
+    Checks and reconnects to the NTP server if necessary.
+    Ensures the controller has an accurate time source.
+    """
+    global ntp, last_ntp_check
+    current_time = time.time()
+    if current_time - last_ntp_check > NTP_CHECK_INTERVAL:
+        try:
+            ntp = ntptime.client(host='dk.pool.ntp.org', timezone=1)
+            last_ntp_check = current_time
+            log_update("NTP reconnected successfully")
+        except Exception as e:
+            log_update("Error reconnecting to NTP: " + str(e))
+
 @timerSch.event('ntpTimer')
 def tntpTimer():
-    global ntp
-    ntp = ntptime.client(host='dk.pool.ntp.org', timezone=1)
+    """
+    Periodically checks the NTP connection and updates night mode.
+    """
+    check_ntp_connection()
     check_night_mode()
 
 # MQTT initialization
@@ -245,9 +290,13 @@ m5mqtt.subscribe('HUE_CONTROLLER_STATUS_REQUEST', fun_HUE_CONTROLLER_STATUS_REQU
 m5mqtt.subscribe('HUE_CONTROLLER_COMMAND', fun_HUE_CONTROLLER_COMMAND_)
 m5mqtt.subscribe('NIGHT_MODE_OVERRIDE', fun_NIGHT_MODE_OVERRIDE_)
 m5mqtt.subscribe('DDU_TIME', fun_DDU_TIME)
+m5mqtt.subscribe('UPDATE_LIGHTS', fun_UPDATE_LIGHTS)
+
 m5mqtt.start()
 m5mqtt.publish('KMG CONTROLLER STARTUP', 'Start', 0)
 
+# Initialize the last_ntp_check variable during startup
+last_ntp_check = time.time()
 ntp = ntptime.client(host='dk.pool.ntp.org', timezone=1)
 check_night_mode()
-timerSch.run('ntpTimer', 360000, 0)
+timerSch.run('ntpTimer', 360000, 0)  # Run every 6 minutes (360000 ms)
