@@ -1,114 +1,113 @@
-*{
-    margin:0;
-    padding:0;
+* {
+    margin: 0;
+    padding: 0;
     box-sizing: border-box;
 }
 
-#reload{
-    position:fixed;
-    right:1rem;
-    bottom:1rem;
-    z-index:10;
-    cursor: pointer;
-    width:3rem;
-    height:3rem;
-    background-color: black;
-    border-radius:50%;
-    display:grid;
-    place-items:center;
-    color:white;
-    font-size:1.5rem;
-    border:1px solid whitesmoke;
+body, html {
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* Prevent body from interfering with scrolling */
 }
 
-#reload img{
-    width:2rem;
-    height:2rem;
+#reload {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 10;
+    cursor: pointer;
+    width: 3rem;
+    height: 3rem;
+    background-color: black;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: white;
+    font-size: 1.5rem;
+    border: 1px solid whitesmoke;
 }
-#reload:hover{
+
+#reload img {
+    width: 2rem;
+    height: 2rem;
+}
+
+#reload:hover {
     background-color: #228B22;
     transition: 0.3s all ease-in-out;
 }
 
-.page{
-    position:fixed;
-    top:0;
-    left:-100vw;
-    width:100vw;
-    display:grid;
+.page {
+    position: fixed;
+    top: 0;
+    left: -100vw;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
     transition: 0.3s 0.3s all ease-in-out;
-    place-items:center;
-    overflow-y: auto;
+    background-color: black; /* Default background */
+    overflow: hidden; /* Prevent overflow outside the page */
+}
+
+.page-container {
+    flex: 1; /* Allow the container to take up remaining space */
+    overflow-y: auto; /* Enable vertical scrolling */
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+    padding: 0;
     padding:1rem;
-    height:100vh;
 }
 
-.control_button{
-    width:100%;
-    height:10rem;
-    border:1px solid whitesmoke;
-    border-radius:.8rem;
-    color:white;
-    font-size:3rem;
-    display:grid;
-    place-items:center;
-    cursor: pointer;;    
+.control_button {
+    width: 100%;
+    height: 10rem;
+    border: 1px solid whitesmoke;
+    border-radius: 0.8rem;
+    color: white;
+    font-size: 3rem;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
 }
 
-.active{
+.active {
     background: linear-gradient(to bottom, #228B22, transparent);
 }
 
-
-.visible{
-    left:0;
+.visible {
+    left: 0;
     transition: 0.3s all ease-in-out;
 }
 
-#page1{
-    background-color: black;
-}
-
-#page2{
-    background-color: green;
-}
-#page3{
-    background-color: blue;
-}
-#page4{
-    background-color: red;
-}
-#page5{
-    background-color: brown;
-}
-
-h1{
-    font-family: Arial;
-    color:white;
+h1 {
+    font-family: Arial, sans-serif;
+    color: white;
     font-weight: bolder;
 }
-#hint{
-    font-size:3rem;
-    color:whitesmoke;
-}
 
-/* Ensure full width and scrollable for mobile */
-body {
-    width: 100%;
-    height: 100%;
-    overflow-x: hidden;
-    overflow-y: auto;
+#hint {
+    font-size: 3rem;
+    color: whitesmoke;
 }
 
 @media (max-width: 768px) {
-    body{
-        margin:0;
-        padding:0;
+    body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden; /* Prevent body from interfering with scrolling */
     }
+
     .page {
         width: 100%;
-        height: auto;
-        overflow-y: auto;
+        height: 100vh; /* Ensure the page takes the full viewport height */
+        overflow: hidden; /* Prevent scrolling on the page itself */
+    }
+
+    .page-container {
+        flex: 1; /* Allow the container to take up remaining space */
+        height: 100%; /* Ensure it fills the available height */
+        overflow-y: auto; /* Enable vertical scrolling */
+        overflow-x: hidden; /* Prevent horizontal scrolling */
         padding: 0;
     }
 
