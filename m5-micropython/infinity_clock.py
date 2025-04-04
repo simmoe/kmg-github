@@ -22,7 +22,6 @@ fade_duration = 3000  # Fade varighed i ms (3 sekunder)
 FADE_INTERVAL = 10  # Opdateringsinterval for fadeTimer i ms – kan ændres for test
 last_hour = -1  # Gem sidst publicerede time
 
-label0 = M5TextBox(16, 97, "INFINITY", lcd.FONT_DejaVu24, 0xFFFFFF, rotate=0)
 
 def custom_round(x):
     if x >= 0:
@@ -67,11 +66,6 @@ def tecoTimer():
 
     neopixel_1.setColor(hour_led, 0xffffff)
 
-    # MQTT-besked hver hele time
-    if current_hour != last_hour:
-        last_hour = current_hour
-        current_time = "{:02d}:{:02d}".format(current_hour, current_minute)
-        m5mqtt.publish('DDU_TIME', current_time, 0)
 
 @timerSch.event('ntpTimer')
 def tntpTimer():
@@ -126,9 +120,6 @@ def fadeTimer():
 
 apikey = '584E331D'
 hue_username = '6MXQnVOMUBwAuqXnedzRZ4cvhaI9MCLgSjYOrjdx'
-m5mqtt = M5mqtt('', 'mqtt.nextservices.dk', 0, '', '', 300, ssl=True)
-m5mqtt.start()
-m5mqtt.publish('KMG CONTROLLER STARTUP', 'Start', 0)
 neopixel_1.setBrightness(255)
 ntp = ntptime.client(host='dk.pool.ntp.org', timezone=1)
 
