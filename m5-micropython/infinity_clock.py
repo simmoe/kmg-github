@@ -7,28 +7,48 @@ from easyIO import *
 import unit
 import math
 import time
+import machine
 
 setScreenColor(0x111111)
 neopixel_1 = unit.get(unit.NEOPIXEL, unit.PORTA, 49)
+rtc = machine.RTC()
 
 # Globale variabler
-apikey = None
-hue_username = None
+apikey = '584E331D'
+hue_username = '6MXQnVOMUBwAuqXnedzRZ4cvhaI9MCLgSjYOrjdx'
 hour_led = None
 minute_led = None
 last_minute = -1
 minute_fade_start = None
-fade_duration = 3000  # Fade varighed i ms (3 sekunder)
-FADE_INTERVAL = 10  # Opdateringsinterval for fadeTimer i ms – kan ændres for test
-last_hour = -1  # Gem sidst publicerede time
+fade_duration = 3000
+FADE_INTERVAL = 10
+last_hour = -1
 
-label0 = M5TextBox(16, 97, "INFINITY", lcd.FONT_DejaVu24, 0xFFFFFF, rotate=0)
+neopixel_1.setBrightness(255)
+
+def get_danish_time():
+    utc_secs = time.time()  # RTC i sekunder = UTC
+    utc = time.localtime(utc_secs)
+    year, month, mday = utc[0], utc[1], utc[2]
+
+    # Find sidste søndag i marts/oktober
+    def last_sunday(year, month):
+        for day in range(31, 24, -1):
+            if time.localtime(time.mktime((year, month, day, 0, 0, 0, 0, 0)))[6] == 6:
+                return day
+
+    # Bestem om vi er i dansk sommertid (DST)
+    dst = (
+        (month > 3 and month < 10) or
+        (month == 3 and mday >= last_sunday(year, 3)) or
+        (month == 10 and mday < last_sunday(year, 10))
+    )
+
+    offset = 1 * 3600 if dst else 0 * 3600
+    return time.localtime(utc_secs + offset)
 
 def custom_round(x):
-    if x >= 0:
-        return int(x + 0.5)
-    else:
-        return -int(abs(x) + 0.5)
+    return int(x + 0.5) if x >= 0 else -int(abs(x) + 0.5)
 
 def hour_to_led(hour):
     t = hour % 12
@@ -46,17 +66,16 @@ def minute_to_led(minute):
     return led
 
 def smoothstep(x):
-    if x < 0:
-        x = 0
-    elif x > 1:
-        x = 1
+    x = max(0, min(1, x))
     return x * x * (3 - 2 * x)
 
 @timerSch.event('ecoTimer')
 def tecoTimer():
-    global hour_led, minute_led, ntp, last_minute, minute_fade_start, last_hour
-    current_minute = ntp.minute()
-    current_hour = ntp.hour()
+    global hour_led, minute_led, last_minute, minute_fade_start
+
+    t = get_danish_time()
+    current_hour = t[3]
+    current_minute = t[4]
 
     hour_led = hour_to_led(current_hour)
     minute_led = minute_to_led(current_minute)
@@ -67,16 +86,13 @@ def tecoTimer():
 
     neopixel_1.setColor(hour_led, 0xffffff)
 
-    # MQTT-besked hver hele time
-    if current_hour != last_hour:
-        last_hour = current_hour
-        current_time = "{:02d}:{:02d}".format(current_hour, current_minute)
-        m5mqtt.publish('DDU_TIME', current_time, 0)
-
 @timerSch.event('ntpTimer')
 def tntpTimer():
-    global ntp
-    ntp = ntptime.client(host='dk.pool.ntp.org', timezone=1)
+    try:
+        ntptime.host = 'dk.pool.ntp.org'
+        ntptime.settime()
+    except:
+        print("NTP sync failed")
 
 @timerSch.event('fadeTimer')
 def fadeTimer():
@@ -99,10 +115,7 @@ def fadeTimer():
                 elapsed = time.ticks_diff(time.ticks_ms(), minute_fade_start)
                 if elapsed < fade_duration:
                     phase = elapsed / fade_duration
-                    if phase < 0.5:
-                        factor = 1.0 - (phase * 2)
-                    else:
-                        factor = (phase - 0.5) * 2
+                    factor = 1.0 - (phase * 2) if phase < 0.5 else (phase - 0.5) * 2
                 else:
                     minute_fade_start = None
             r = int(0xFF * factor)
@@ -124,17 +137,11 @@ def fadeTimer():
                 color = 0x000000
             neopixel_1.setColor(led, color)
 
-apikey = '584E331D'
-hue_username = '6MXQnVOMUBwAuqXnedzRZ4cvhaI9MCLgSjYOrjdx'
-m5mqtt = M5mqtt('', 'mqtt.nextservices.dk', 0, '', '', 300, ssl=True)
-m5mqtt.start()
-m5mqtt.publish('KMG CONTROLLER STARTUP', 'Start', 0)
-neopixel_1.setBrightness(255)
-ntp = ntptime.client(host='dk.pool.ntp.org', timezone=1)
-
-timerSch.run('ntpTimer', 360000, 0x00)
-timerSch.run('ecoTimer', 1000, 0x00)
+# Start timere
+timerSch.run('ntpTimer', 360000, 0x00)     # Sync NTP hvert 6. minut
+timerSch.run('ecoTimer', 1000, 0x00)       # Opdater hver sekund
 timerSch.run('fadeTimer', FADE_INTERVAL, 0x00)
 
+# Main loop
 while True:
     wait_ms(2)
