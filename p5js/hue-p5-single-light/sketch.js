@@ -1,7 +1,7 @@
 //https://developers.meethue.com/develop/hue-api/
 
-var ip = '10.78.65.185' // the hub IP address
-var username = 'kgMgko5iDYljmA3ERym5GDibEkDzQTxutUSDqN36'       // fill in your Hub-given username here
+var ip = '10.78.16.62' // the hub IP address
+var username = '6MXQnVOMUBwAuqXnedzRZ4cvhaI9MCLgSjYOrjdx'       // fill in your Hub-given username here
 let myLight = 1
 let url = 'http://' + ip + '/api/' + username + '/lights/' + myLight 
 
