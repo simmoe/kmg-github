@@ -8,6 +8,7 @@ import unit
 import math
 import time
 import machine
+import gc  # Import garbage collection module
 
 setScreenColor(0x111111)
 neopixel_1 = unit.get(unit.NEOPIXEL, unit.PORTA, 49)
@@ -25,6 +26,9 @@ FADE_INTERVAL = 10
 last_hour = -1
 
 neopixel_1.setBrightness(255)
+
+# Initialize the watchdog timer
+wdt = machine.WDT(timeout=10000)  # 10-second timeout
 
 def get_danish_time():
     utc_secs = time.time()  # RTC i sekunder = UTC
@@ -84,15 +88,18 @@ def tecoTimer():
         minute_fade_start = time.ticks_ms()
         last_minute = current_minute
 
-    neopixel_1.setColor(hour_led, 0xffffff)
+    try:
+        neopixel_1.setColor(hour_led, 0xffffff)
+    except Exception:
+        pass  # Ignore errors to prevent hangs
 
 @timerSch.event('ntpTimer')
 def tntpTimer():
     try:
         ntptime.host = 'dk.pool.ntp.org'
         ntptime.settime()
-    except:
-        print("NTP sync failed")
+    except Exception:
+        pass  # Ignore errors to prevent hangs
 
 @timerSch.event('fadeTimer')
 def fadeTimer():
@@ -109,33 +116,36 @@ def fadeTimer():
         if d > 24.5:
             d = 49 - d
 
-        if led == minute_led:
-            factor = 1.0
-            if minute_fade_start is not None:
-                elapsed = time.ticks_diff(time.ticks_ms(), minute_fade_start)
-                if elapsed < fade_duration:
-                    phase = elapsed / fade_duration
-                    factor = 1.0 - (phase * 2) if phase < 0.5 else (phase - 0.5) * 2
-                else:
-                    minute_fade_start = None
-            r = int(0xFF * factor)
-            g = int(0x45 * factor)
-            b = 0
-            minute_color = (r << 16) | (g << 8) | b
-            neopixel_1.setColor(led, minute_color)
-        elif led == hour_led:
-            continue
-        else:
-            if d < snake_length:
-                t = d / snake_length
-                factor = 1.0 - smoothstep(t)
-                r = int(((base_color >> 16) & 0xFF) * factor)
-                g = int(((base_color >> 8) & 0xFF) * factor)
-                b = int((base_color & 0xFF) * factor)
-                color = (r << 16) | (g << 8) | b
+        try:
+            if led == minute_led:
+                factor = 1.0
+                if minute_fade_start is not None:
+                    elapsed = time.ticks_diff(time.ticks_ms(), minute_fade_start)
+                    if elapsed < fade_duration:
+                        phase = elapsed / fade_duration
+                        factor = 1.0 - (phase * 2) if phase < 0.5 else (phase - 0.5) * 2
+                    else:
+                        minute_fade_start = None
+                r = int(0xFF * factor)
+                g = int(0x45 * factor)
+                b = 0
+                minute_color = (r << 16) | (g << 8) | b
+                neopixel_1.setColor(led, minute_color)
+            elif led == hour_led:
+                continue
             else:
-                color = 0x000000
-            neopixel_1.setColor(led, color)
+                if d < snake_length:
+                    t = d / snake_length
+                    factor = 1.0 - smoothstep(t)
+                    r = int(((base_color >> 16) & 0xFF) * factor)
+                    g = int(((base_color >> 8) & 0xFF) * factor)
+                    b = int((base_color & 0xFF) * factor)
+                    color = (r << 16) | (g << 8) | b
+                else:
+                    color = 0x000000
+                neopixel_1.setColor(led, color)
+        except Exception:
+            pass  # Ignore errors to prevent hangs
 
 # Start timere
 timerSch.run('ntpTimer', 360000, 0x00)     # Sync NTP hvert 6. minut
@@ -145,3 +155,5 @@ timerSch.run('fadeTimer', FADE_INTERVAL, 0x00)
 # Main loop
 while True:
     wait_ms(2)
+    wdt.feed()  # Feed the watchdog
+    gc.collect()  # Run garbage collection
