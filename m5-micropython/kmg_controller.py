@@ -38,7 +38,7 @@ MQTT_SIGN_TOPIC = 'DDU_INFINITY'
 timeLabel = M5Label('Test time', x=30, y=53, color=0x000, font=FONT_MONT_14, parent=None)
 nightModeLabel = M5Label('Updating night mode status...', x=30, y=73, color=0x000, font=FONT_MONT_14, parent=None)
 updateLabel = M5Label('System started...', x=30, y=93, color=0x000, font=FONT_MONT_14, parent=None)
-debugLabel = M5Label('Debug: OK', x=30, y=113, color=0x000, font=FONT_MONT_14, parent=None)
+debugLabel = M5Label('Debug: OK', x=30, y=200, color=0x000, font=FONT_MONT_14, parent=None)
 
 # Opret et dictionary til at holde checkbox references
 checkboxes = {}
