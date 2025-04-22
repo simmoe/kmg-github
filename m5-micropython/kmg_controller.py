@@ -38,6 +38,7 @@ MQTT_SIGN_TOPIC = 'DDU_INFINITY'
 timeLabel = M5Label('Test time', x=30, y=53, color=0x000, font=FONT_MONT_14, parent=None)
 nightModeLabel = M5Label('Updating night mode status...', x=30, y=73, color=0x000, font=FONT_MONT_14, parent=None)
 updateLabel = M5Label('System started...', x=30, y=93, color=0x000, font=FONT_MONT_14, parent=None)
+debugLabel = M5Label('Debug: OK', x=30, y=113, color=0x000, font=FONT_MONT_14, parent=None)
 
 # Opret et dictionary til at holde checkbox references
 checkboxes = {}
@@ -84,6 +85,9 @@ for i, light in enumerate(night_lights):
 def log_update(msg):
     """Opdaterer updateLabel med en kort besked."""
     updateLabel.set_text(msg)
+
+def update_debug_label(msg):
+    debugLabel.set_text('Debug: ' + msg[:20])  # Limit to 20 characters to save space
 
 def hue_request(method, path, json_data=None):
     """Central funktion til HTTP-kald til Hue API'et."""
@@ -248,9 +252,7 @@ def fun_DDU_TIME(topic_data):
         group_endpoint = 'groups/81/action'
         for i in range(blink_count):
             hue_request('PUT', group_endpoint, {'on': True})
-            time.sleep(1)
-            hue_request('PUT', group_endpoint, {'on': False})
-            time.sleep(1)
+            timerSch.run_once(lambda: hue_request('PUT', group_endpoint, {'on': False}), 1000)  # 1-second delay
         
         # Gendan lysenes tilstand baseret på den oprindelige værdi
         for light in night_lights:
@@ -258,8 +260,8 @@ def fun_DDU_TIME(topic_data):
             light["on"] = orig_states[light["id"]]
         log_update("Blinking complete, states restored")
         display_lights_status()
-    except Exception as e:
-        log_update("Error in DDU_TIME: " + str(e))
+    except Exception:
+        pass  # Prevent crashes in case of errors
 
 # Add a global variable to track the last time the NTP server was checked
 last_ntp_check = 0
@@ -274,19 +276,44 @@ def check_ntp_connection():
     current_time = time.time()
     if current_time - last_ntp_check > NTP_CHECK_INTERVAL:
         try:
+            update_debug_label('NTP reconnecting')
             ntp = ntptime.client(host='dk.pool.ntp.org', timezone=1)
             last_ntp_check = current_time
-            log_update("NTP reconnected successfully")
+            update_debug_label('NTP reconnected')
         except Exception as e:
-            log_update("Error reconnecting to NTP: " + str(e))
+            update_debug_label('NTP error: ' + str(e)[:15])
 
+# Ensure MQTT reconnection logic is robust
+def ensure_mqtt_connection():
+    try:
+        if not m5mqtt.is_connected():
+            update_debug_label('MQTT reconnecting')
+            m5mqtt.start()
+            update_debug_label('MQTT reconnected')
+    except Exception as e:
+        update_debug_label('MQTT error: ' + str(e)[:15])
+
+# Temporarily disable the watchdog timer to debug restarts
+# from machine import WDT
+
+# Commenting out the watchdog initialization for debugging
+# wdt = WDT(timeout=10000)
+
+# Ensure the watchdog timer is fed periodically in the ntpTimer function
 @timerSch.event('ntpTimer')
 def tntpTimer():
-    """
-    Periodically checks the NTP connection and updates night mode.
-    """
-    check_ntp_connection()
-    check_night_mode()
+    try:
+        update_debug_label('Timer running')
+        # Temporarily disable watchdog feeding for debugging
+        # wdt.feed()
+        ensure_mqtt_connection()
+        update_debug_label('MQTT checked')
+        check_ntp_connection()
+        update_debug_label('NTP checked')
+        check_night_mode()
+        update_debug_label('Night mode checked')
+    except Exception as e:
+        update_debug_label('Error: ' + str(e)[:15])  # Show a short error message
 
 # MQTT initialization
 m5mqtt = M5mqtt('', 'mqtt.nextservices.dk', 0, '', '', 300, ssl=True)
