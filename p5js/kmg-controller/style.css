@@ -70,9 +70,6 @@ body, html {
     cursor: pointer;
 }
 
-.active {
-    background: linear-gradient(to bottom, #228B22, transparent);
-}
 
 .visible {
     left: 0;
@@ -88,6 +85,15 @@ h1 {
 #hint {
     font-size: 3rem;
     color: whitesmoke;
+}
+
+.color_slider{
+    width: 100%;
+    height: 5rem;
+    background-color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 @media (max-width: 768px) {

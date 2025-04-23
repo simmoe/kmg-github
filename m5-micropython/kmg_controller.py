@@ -177,21 +177,32 @@ def fun_HUE_CONTROLLER_COMMAND_(topic_data):
     try:
         log_update("Received command: " + topic_data)
         cmd = json.loads(topic_data)
-        on_val = True if get_json_key(cmd, 'on') else False
-        light_id = int(get_json_key(cmd, 'light'))
-        res = hue_request('PUT', 'lights/' + str(light_id) + '/state', {'on': on_val})
-        if res is not None:
-            m5mqtt.publish('HUE_CONTROLLER/status', res, 0)
-            update_night_light_state(light_id, on_val)
-            log_update("Light " + str(light_id) + " set to " + ("on" if on_val else "off"))
-            # Update the relevant checkbox
-            cb = checkboxes.get(light_id)
-            if cb:
-                cb.set_checked(on_val)
-        else:
-            m5mqtt.publish('HUE_CONTROLLER/status', "Error", 0)
+        light_id = int(cmd.get('light', -1))
+
+        xy_val = cmd.get('xy')
+        if xy_val is not None:
+            res = hue_request('PUT', 'lights/' + str(light_id) + '/state', {'xy': xy_val})
+            if res is not None:
+                m5mqtt.publish('HUE_CONTROLLER/status', res, 0)
+                log_update("Light " + str(light_id) + " set to " + str(xy_val))
+            else:
+                m5mqtt.publish('HUE_CONTROLLER/status', json.dumps({"error": "Hue API request failed"}), 0)
+            return
+
+        on_val = cmd.get('on')
+        if on_val is not None:
+            res = hue_request('PUT', 'lights/' + str(light_id) + '/state', {'on': bool(on_val)})
+            if res is not None:
+                m5mqtt.publish('HUE_CONTROLLER/status', res, 0)
+                update_night_light_state(light_id, bool(on_val))
+                log_update("Light " + str(light_id) + " set to " + ("on" if on_val else "off"))
+            else:
+                m5mqtt.publish('HUE_CONTROLLER/status', json.dumps({"error": "Hue API request failed"}), 0)
+            return
+
+        m5mqtt.publish('HUE_CONTROLLER/status', json.dumps({"error": "Unknown command"}), 0)
     except Exception as e:
-        m5mqtt.publish('HUE_CONTROLLER/status', str(e), 0)
+        m5mqtt.publish('HUE_CONTROLLER/status', json.dumps({"error": str(e)}), 0)
         log_update("Error in COMMAND: " + str(e))
 
 def fun_NIGHT_MODE_OVERRIDE_(topic_data):

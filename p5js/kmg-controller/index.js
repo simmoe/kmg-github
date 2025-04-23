@@ -4,6 +4,7 @@ let client;
 
 let ddu_sign_button, ddu_sign_active;
 let night_mode_override_button, night_mode_override_active;
+let sliderTimers = {}; // Store timers for each light
 
 function setup() {    
     // Force reload knap
@@ -124,6 +125,16 @@ function setup() {
             toggleHueLight(lightNumber);
         });
     });
+
+    // Add event listeners to sliders
+    selectAll('.color_slider').forEach(slider => {
+        let lightNumber = slider.attribute('data-lightnumber');
+        slider.input(() => {
+            let value = slider.value();
+            handleSliderChange(lightNumber, value);
+            updateButtonColor(lightNumber, value);
+        });
+    });
 }
 
 function toggleHueLight(lightNumber) {
@@ -145,4 +156,63 @@ function updateHueButton(lightNumber, isActive, brightness) {
     } else {
         button.removeClass('active');
     }
+}
+
+function handleSliderChange(lightNumber, value) {
+    if (sliderTimers[lightNumber]) {
+        clearTimeout(sliderTimers[lightNumber]);
+    }
+
+    sliderTimers[lightNumber] = setTimeout(() => {
+        let xy = mapSliderToXY(value);
+        let payload = JSON.stringify({ "light": lightNumber, "xy": xy });
+        client.publish('HUE_CONTROLLER_COMMAND', payload);
+        console.log(`Updated Light ${lightNumber} to XY:`, xy);
+    }, 500); // Throttle to twice per second
+}
+
+function mapSliderToXY(value) {
+    // Map slider value (0-100) to a path in the CIE color space
+    let x = 0.15 + (value / 100) * 0.7; // Example mapping for x
+    let y = 0.15 + (value / 100) * 0.7; // Example mapping for y
+    return [x, y];
+}
+
+function updateButtonColor(lightNumber, value) {
+    let button = select(`.control_button[data-lightnumber="${lightNumber}"]`);
+    if (button) {
+        let xy = mapSliderToXY(value);
+        let rgb = convertXYToRGB(xy[0], xy[1]);
+        button.style('background-color', `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`);
+    }
+}
+
+function convertXYToRGB(x, y) {
+    // Assume a fixed brightness for simplicity
+    let brightness = 1.0;
+
+    // Calculate z coordinate
+    let z = 1.0 - x - y;
+
+    // Convert to RGB using the CIE formula
+    let Y = brightness;
+    let X = (Y / y) * x;
+    let Z = (Y / y) * z;
+
+    // Convert to linear RGB
+    let r = X * 1.656492 - Y * 0.354851 - Z * 0.255038;
+    let g = -X * 0.707196 + Y * 1.655397 + Z * 0.036152;
+    let b = X * 0.051713 - Y * 0.121364 + Z * 1.011530;
+
+    // Apply gamma correction and clamp values
+    r = r <= 0.0031308 ? 12.92 * r : (1.055 * Math.pow(r, 1.0 / 2.4) - 0.055);
+    g = g <= 0.0031308 ? 12.92 * g : (1.055 * Math.pow(g, 1.0 / 2.4) - 0.055);
+    b = b <= 0.0031308 ? 12.92 * b : (1.055 * Math.pow(b, 1.0 / 2.4) - 0.055);
+
+    // Clamp values to [0, 255]
+    r = Math.max(0, Math.min(255, Math.round(r * 255)));
+    g = Math.max(0, Math.min(255, Math.round(g * 255)));
+    b = Math.max(0, Math.min(255, Math.round(b * 255)));
+
+    return { r, g, b };
 }
