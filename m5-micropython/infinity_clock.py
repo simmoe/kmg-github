@@ -2,7 +2,8 @@ from m5stack import *
 from m5ui import *
 from uiflow import *
 import ntptime
-from m5mqtt import M5mqtt
+# Removed MQTT import
+# from m5mqtt import M5mqtt
 from easyIO import *
 import unit
 import math
@@ -29,6 +30,10 @@ neopixel_1.setBrightness(255)
 
 # Initialize the watchdog timer
 wdt = machine.WDT(timeout=10000)  # 10-second timeout
+
+# Track start time for periodic reset
+reset_interval_ms = 24 * 60 * 60 * 1000  # 24 hours in ms
+start_time = time.ticks_ms()
 
 def get_danish_time():
     utc_secs = time.time()  # RTC i sekunder = UTC
@@ -157,3 +162,6 @@ while True:
     wait_ms(2)
     wdt.feed()  # Feed the watchdog
     gc.collect()  # Run garbage collection
+    # Brute-force reset every 24 hours
+    if time.ticks_diff(time.ticks_ms(), start_time) > reset_interval_ms:
+        machine.reset()
